@@ -1,12 +1,16 @@
+from drive_system import DriveSystem
 from control_server import ControlServer
 
 if __name__ == "__main__":
     # not on the raspberry pi, just mock it
-    def drive_system():
-        pass
+    try:
+        drive_system = DriveSystem()
+    except:
+        def drive_system():
+            pass
 
-    drive_system.set_desired_motion = lambda x, y, omega: print(
-        'mock drive', x, y, omega)
+        drive_system.set_desired_motion = lambda x, y, omega: print(
+            'mock drive', x, y, omega)
 
     def kicker_system():
         pass
