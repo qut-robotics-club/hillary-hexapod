@@ -1,11 +1,11 @@
-from drive_system import DriveSystem
+from drive_system.hexapod import HexapodDrive
 from control_server import ControlServer
 
 if __name__ == "__main__":
-    # not on the raspberry pi, just mock it
     try:
-        drive_system = DriveSystem()
+        drive_system = HexapodDrive()
     except:
+        # not on the raspberry pi, just mock it
         def drive_system():
             pass
 
