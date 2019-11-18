@@ -2,9 +2,9 @@
 TODO: replace GPIO_DEPRECATED_320 with just the gpiozero library
 """
 
-import gpio_deprecated_320 as GPIO
 import numpy as np
-from drive_system import DriveSystem
+import .gpio_deprecated_320 as GPIO
+from .drive_system import DriveSystem
 
 
 class MotorDriver(GPIO.PWM):

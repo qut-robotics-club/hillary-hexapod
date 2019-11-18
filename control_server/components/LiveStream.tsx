@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { useEffect, Dispatch, useState, Fragment, SetStateAction } from "react";
-import { useApi } from "../api";
+import { useApi } from "../ts/api";
 import WSAvcPlayer from "ws-avc-player";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {

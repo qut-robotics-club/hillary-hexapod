@@ -2,7 +2,7 @@ import Rodal from "rodal";
 
 import "rodal/lib/rodal.css";
 
-import { API } from "../api";
+import { API } from "../ts/api";
 
 interface IMenuProps {
   onClose: () => void;

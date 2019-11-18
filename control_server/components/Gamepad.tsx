@@ -5,7 +5,7 @@ import { useState } from "react";
 import Menu from "./Menu";
 import LiveStream from "./LiveStream";
 
-import { useApi } from "../api";
+import { useApi } from "../ts/api";
 
 const App = styled.div`
   font-family: Impact, Charcoal, sans-serif;

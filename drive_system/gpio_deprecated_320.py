@@ -47,11 +47,14 @@ class GPIODevice(ABC):
                 "GPIO Device object has an empty config (both static and dynamic)")
 
         for pin, cfg in {**self.config, **self.dynamic_config}.items():
+
             if isinstance(cfg, GPIODevice):
                 cfg.setup()
+
             elif isinstance(cfg, int):  # direction type
                 setup(pin, cfg)
                 devices[self].append((pin, cfg))
+
             elif isinstance(cfg, GPIOZDev):
                 setup(pin, isinstance(cfg, OutputDevice))
                 devices[self].append((pin, cfg))
