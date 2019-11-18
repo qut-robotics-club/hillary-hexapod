@@ -51,7 +51,7 @@ class DancingHexapod(HexapodPro):
 
         self.prepare()
 
-        for r in xrange(4):
+        for _ in range(4):
             self.wave_right_arm_up()
             self.left_front.move(knee_angle=40)
             self.dip_body()
@@ -97,6 +97,6 @@ class DancingHexapod(HexapodPro):
 
         self.prepare()
 
-        for r in xrange(3):
+        for _ in range(3):
             self.thriller_routine1()
             self.thriller_routine2()
