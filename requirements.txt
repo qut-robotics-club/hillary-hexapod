@@ -11,4 +11,4 @@ ffmpy3==0.2.3 # needs a monkey patch to allow correct streaming
 # mpu6050-raspberrypi==1.1
 # smbus2==0.3.0
 scikit-kinematics==0.8.3
-serial==3.4
+pyserial==3.4
