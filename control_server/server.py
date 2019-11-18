@@ -21,13 +21,6 @@ import random
 from concurrent.futures import TimeoutError
 import select
 
-try:
-    from VisionSystem import ColorSpaces
-except:
-    import sys
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from VisionSystem import ColorSpaces
-
 
 SERVER_BASE_DIR = Path(__file__).parents[0].absolute()
 CLIENT_STATICS_DIR = SERVER_BASE_DIR / 'out'

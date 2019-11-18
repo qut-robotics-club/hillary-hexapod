@@ -1,6 +1,4 @@
 from time import sleep
-import serial
-import struct
 
 """ joint_key convention:
     R - right, L - left
@@ -18,33 +16,24 @@ joint_properties = {
     'N': (18, 150, 650)
 }
 
-# specify the raspbian-linux device that ends up routing to the GPIO uart pins (GPIO 14 TX and 15 RX)
-GPIO_SERIAL_DEVICE = "/dev/ttyS0"
-
-with serial.Serial(GPIO_SERIAL_DEVICE) as ser:
-    def drive(ch, val):
-        # mini-SSC
-        SET_SERVO_POS_CMD_BYTE = b'\x84'
-        channel_byte = bytes([ch])
-        drive_servo_cmd = SET_SERVO_POS_CMD_BYTE + \
-            channel_byte + struct.pack("H", val)
-        ser.write(drive_servo_cmd)
-
 
 class HexapodCore:
 
-    def __init__(self):
+    def __init__(self, servo_driver):
 
-        self.neck = Joint("neck", 'N')
+        self.neck = Joint("neck", 'N', servo_driver)
 
-        self.left_front = Leg('left front', 'LFH', 'LFK', 'LFA')
-        self.right_front = Leg('right front', 'RFH', 'RFK', 'RFA')
+        self.left_front = Leg('left front', 'LFH', 'LFK', 'LFA', servo_driver)
+        self.right_front = Leg('right front', 'RFH',
+                               'RFK', 'RFA', servo_driver)
 
-        self.left_middle = Leg('left middle', 'LMH', 'LMK', 'LMA')
-        self.right_middle = Leg('right middle', 'RMH', 'RMK', 'RMA')
+        self.left_middle = Leg('left middle', 'LMH',
+                               'LMK', 'LMA', servo_driver)
+        self.right_middle = Leg('right middle', 'RMH',
+                                'RMK', 'RMA', servo_driver)
 
-        self.left_back = Leg('left back', 'LBH', 'LBK', 'LBA')
-        self.right_back = Leg('right back', 'RBH', 'RBK', 'RBA')
+        self.left_back = Leg('left back', 'LBH', 'LBK', 'LBA', servo_driver)
+        self.right_back = Leg('right back', 'RBH', 'RBK', 'RBA', servo_driver)
 
         self.legs = [self.left_front, self.right_front,
                      self.left_middle, self.right_middle,
@@ -74,11 +63,12 @@ class HexapodCore:
 
 class Leg:
 
-    def __init__(self, name, hip_key, knee_key, ankle_key, max_hip=45, max_knee=50, knee_leeway=10):
+    def __init__(self, name, hip_key, knee_key, ankle_key, servo_driver, max_hip=45, max_knee=50, knee_leeway=10):
 
-        self.hip = Joint("hip", hip_key, max_hip)
-        self.knee = Joint("knee", knee_key, max_knee, leeway=knee_leeway)
-        self.ankle = Joint("ankle", ankle_key)
+        self.hip = Joint("hip", hip_key, max_hip, servo_driver)
+        self.knee = Joint("knee", knee_key, servo_driver,
+                          max_knee, leeway=knee_leeway)
+        self.ankle = Joint("ankle", servo_driver, ankle_key)
 
         self.name = name
         self.joints = [self.hip, self.knee, self.ankle]
@@ -118,7 +108,7 @@ class Leg:
 
 class Joint:
 
-    def __init__(self, joint_type, jkey, maxx=90, leeway=0):
+    def __init__(self, joint_type, jkey, servo_driver, maxx=90, leeway=0):
 
         self.joint_type, self.name = joint_type, jkey
         self.channel, self.min_pulse, self.max_pulse = joint_properties[jkey]
@@ -133,13 +123,13 @@ class Joint:
         pulse = remap(angle, (-self.max, self.max),
                       (self.min_pulse, self.max_pulse))
 
-        drive(self.channel, pulse)
+        self.servo_driver.drive(self.channel, pulse)
         self.angle = angle
 
         # print repr(self), ':', 'pulse', pulse
 
     def off(self):
-        drive(self.channel, 0)
+        self.servo_driver.drive(self.channel, 0)
         self.angle = None
 
     def __repr__(self):
