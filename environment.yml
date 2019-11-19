@@ -1,26 +1,38 @@
 name: qutrc
 
-# conda environment dependencies come in two forms:
+# this limits the binary packages to either those that don't use binaries
+# or those that use binaries compatible with the raspberry Pi
+channels:
+  - https://conda.anaconda.org/rpi/linux-armv7l
+  - https://conda.anaconda.org/rpi/noarch
 
-# 1) conda dependencies (provide the best build tooling / integration)
-# search the conda package repository at https://anaconda.org/search to find these
+# you can add private repositories to the above channel list, just make sure that the target arch is correct
+
+# Conda environment dependencies come in two forms:
+
+# 1) conda dependencies (provide the best build tooling / integration). Mainly for binaries
+# search the "rpi" conda package repository for binary/dll modules: `conda search -c rpi <PACKAGE>`
+
+# all the packages are built by the berryconda repository (https://github.com/jjhelmus/berryconda/tree/master/recipes)
 dependencies:
-  - python=3.6
+  - python=3.6.6
   - scipy=1.0.0
-  - numpy=1.14.0
-  - pyserial=3.4
-  - picamera=1.13
-  - sanic=19.9.0
-  - bqplot=0.12.1
-  - librosa=0.7.1
-  - matplotlib=3.1.2
+  - numpy=1.15.1
+  - pyserial=3.4.0
 
-  # 2) pypi packages (work for other python repositories), 2nd best to conda packages
-  # in terms of ease-of-integration
+  # 2) pypi packages (work for other python repositories). Mainly for python-code packages.
+  # in terms of ease-of-integration because they often reference binaries on the path by name,
+  # rather than including them as build arguments.
   - pip:
+      - picamera==1.13.0
       - pyngrok==1.4.0
+      - sanic==19.9.0
       - Sanic-Cors==0.9.9.post1
       - scikit-kinematics==0.8.3
       - aiofile==1.5.2
       - ffmpy3==0.2.3 # needs a monkey patch to allow correct streaming
       - gpiozero==1.5.1
+      - bqplot==0.12.1
+      - librosa==0.7.1
+      - matplotlib==3.1.1
+      - sendgrid==6.1.0
