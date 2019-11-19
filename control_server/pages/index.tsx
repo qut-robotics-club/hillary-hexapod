@@ -1,8 +1,6 @@
 import dynamic from "next/dynamic";
 
-const Gamepad = dynamic(() => import("../components/Gamepad"), {
-  ssr: false
-});
+const Gamepad = dynamic(() => import("../components/Gamepad"), { ssr: false });
 
 export default () => (
   <>

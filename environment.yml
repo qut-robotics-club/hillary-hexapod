@@ -1,0 +1,26 @@
+name: qutrc
+
+# conda environment dependencies come in two forms:
+
+# 1) conda dependencies (provide the best build tooling / integration)
+# search the conda package repository at https://anaconda.org/search to find these
+dependencies:
+  - python=3.6
+  - scipy=1.0.0
+  - numpy=1.14.0
+  - pyserial=3.4
+  - picamera=1.13
+  - sanic=19.9.0
+  - bqplot=0.12.1
+  - librosa=0.7.1
+  - matplotlib=3.1.2
+
+  # 2) pypi packages (work for other python repositories), 2nd best to conda packages
+  # in terms of ease-of-integration
+  - pip:
+      - pyngrok==1.4.0
+      - Sanic-Cors==0.9.9.post1
+      - scikit-kinematics==0.8.3
+      - aiofile==1.5.2
+      - ffmpy3==0.2.3 # needs a monkey patch to allow correct streaming
+      - gpiozero==1.5.1

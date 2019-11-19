@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { useEffect, Dispatch, useState, Fragment, SetStateAction } from "react";
-import { useApi } from "../ts/api";
+import { API, useApi } from "../ts/api";
 import WSAvcPlayer from "ws-avc-player";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -77,7 +77,7 @@ const LiveStreamErrorMessage = styled.p`
 `;
 
 const linkPlayer = (
-  api,
+  api: API,
   [reactRef, width, height] = useResizeObserver(),
   [streamResolution, setStreamResolution] = useState(null),
   [connected, setConnected] = useState(false)
@@ -100,7 +100,7 @@ const linkPlayer = (
 };
 
 const linkRecorder = (
-  api,
+  api: API,
   [recording, setRecording] = useState(false)
 ): [boolean, Dispatch<SetStateAction<boolean>>] => [
   recording,
@@ -111,11 +111,11 @@ const linkRecorder = (
 ];
 
 const linkVisionSystem = (
-  api,
+  api: API,
   [visionResults, setVisionResults] = useState(null)
 ) =>
   visionResults === null
-    ? api.onVisionSystemResult(setVisionResults) || {}
+    ? (api.onVisionSystemResult(setVisionResults) as null) || {}
     : visionResults;
 
 const LiveStream = ({
@@ -132,71 +132,58 @@ const LiveStream = ({
       <FontAwesomeIcon icon={faExpand} />
     </FullscreenButton>
     <RecordButton onClick={() => setRecording(!recording)}>
-      {recording ? (
-        <FontAwesomeIcon icon={faStopCircle} />
-      ) : (
-        <FontAwesomeIcon icon={faPlayCircle} />
-      )}{" "}
+      <FontAwesomeIcon icon={recording ? faStopCircle : faPlayCircle} />{" "}
       <span style={{ color: "white" }}>REC</span>
     </RecordButton>
 
     {streamResolution ? (
-      ((ctr = 0) => (
-        <Stage
-          width={width}
-          height={height}
-          style={{
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            position: "absolute"
-          }}
-        >
-          <Layer>
-            {Object.keys(visionResults).map(
-              (objName, colorIdx, _, color = CATEGORICAL_COLORS[colorIdx]) =>
-                visionResults[objName].map(
-                  (
-                    [[[x1, y1], [x2, y2]], bearing, distance],
-                    _idx,
-                    _arr,
-                    rescale = streamResolution
-                      ? rescaler(streamResolution, { width, height })
-                      : x => x
-                  ) => {
-                    if (width === 1 && height === 1) {
-                      return null;
-                    }
-                    const res = (
-                      <Fragment key={ctr}>
-                        <Rect
-                          x={rescale(x1, true)}
-                          y={rescale(streamResolution.height - y2, false)}
-                          width={rescale(x2 - x1, true)}
-                          height={rescale(y2 - y1, false)}
-                          stroke={color}
-                          strokeWidth={1}
+      <Stage
+        width={width}
+        height={height}
+        style={{
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          position: "absolute"
+        }}
+      >
+        <Layer>
+          {Object.keys(visionResults).map(
+            (objName, colorIdx, _, color = CATEGORICAL_COLORS[colorIdx]) =>
+              visionResults[objName].map(
+                (
+                  [[[x1, y1], [x2, y2]], bearing, distance],
+                  idx,
+                  _arr,
+                  rescale = streamResolution
+                    ? rescaler(streamResolution, { width, height })
+                    : x => x
+                ) =>
+                  width === 1 && height === 1 ? null : (
+                    <Fragment key={idx}>
+                      <Rect
+                        x={rescale(x1, true)}
+                        y={rescale(streamResolution.height - y2, false)}
+                        width={rescale(x2 - x1, true)}
+                        height={rescale(y2 - y1, false)}
+                        stroke={color}
+                        strokeWidth={1}
+                      />
+                      {fullscreen ? (
+                        <Text
+                          x={rescale(x1 + 2, true)}
+                          y={rescale(streamResolution.height - y2 + 2, false)}
+                          fill={color}
+                          text={`${objName}: ${distance}cm@${bearing}°`}
                         />
-                        {fullscreen ? (
-                          <Text
-                            x={rescale(x1 + 2, true)}
-                            y={rescale(streamResolution.height - y2 + 2, false)}
-                            fill={color}
-                            text={`${objName}: ${distance}cm@${bearing}°`}
-                          />
-                        ) : null}
-                      </Fragment>
-                    );
-                    console.log("got res", res);
-                    ctr += 1;
-                    return res;
-                  }
-                )
-            )}
-          </Layer>
-        </Stage>
-      ))()
+                      ) : null}
+                    </Fragment>
+                  )
+              )
+          )}
+        </Layer>
+      </Stage>
     ) : (
       <LiveStreamErrorMessage>LOADING</LiveStreamErrorMessage>
     )}
