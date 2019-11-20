@@ -22,7 +22,7 @@ dependencies:
   - cython=0.28.5
 
   # 2) pypi packages (work for other python repositories). Mainly for python-code packages.
-  # in terms of ease-of-integration because they often reference binaries on the path by name,
+  # worse in terms of ease-of-integration because they often reference binaries on the path by name,
   # rather than including them as build arguments.
   - pip:
       - picamera==1.13.0
