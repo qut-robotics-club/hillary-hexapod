@@ -2,7 +2,7 @@
 
 Monorepo for live-streaming control for a bunch of RPi QUTRC Robots (hexapods, omnibots, 6DOF-arms)
 
-Current local IP of the Pi on the hexapod on the QUT network is `172.19.9.138`.
+Current local IP of the Pi on the hexapod on the QUT network is `172.19.44.211`.
 This is subject to change at any time the QUT dhcp server rolls over (although the network seems extremely large this year)
 
 To connect to the pi wirelessly, power it up by flipping the switch on the bot and ensuring the battery is charged.
@@ -10,7 +10,7 @@ To connect to the pi wirelessly, power it up by flipping the switch on the bot a
 You can then use the command (Windows or Linux):
 
 ```
-ssh pi@172.19.9.138
+ssh pi@172.19.44.211
 ```
 
 And then put the current password: `rustisthebest` in
@@ -23,7 +23,7 @@ on your development PC, adding a host config like so:
 
 ```
 Host hillary
-    HostName 172.19.9.138
+    HostName 172.19.44.211
     User pi
 ```
 
