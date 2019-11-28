@@ -177,32 +177,27 @@ class ControlServer(Sanic):
 
         # self.video_stream.new_frame_cbs.append(on_new_frame)
 
-        try:
-            while True:
-                cmd_json = await ws.recv()
-                cmd = json.loads(cmd_json)
-                if cmd['act'] == 'drive':
-                    self.drive_system.set_desired_motion(
-                        cmd['x'], cmd['y'], cmd['omega'] / 3)
-                elif cmd['act'] == 'kick':
-                    if self.kicker_system.is_kicking:
-                        self.kicker_system.stop_kicking()
-                    else:
-                        self.kicker_system.start_kicking()
-                elif cmd['act'] == 'dribble':
-                    if cmd['enable']:
-                        self.kicker_system.start_dribbling()
-                    else:
-                        self.kicker_system.stop_dribbling()
-                elif cmd['act'] == 'set_recording':
-                    self.set_recording(cmd['recording'])
+        while True:
+            cmd_json = await ws.recv()
+            cmd = json.loads(cmd_json)
+            print('cmd', cmd)
+            if cmd['act'] == 'drive':
+                self.drive_system.set_desired_motion(
+                    cmd['x'], cmd['y'], cmd['omega'] / 3)
+            elif cmd['act'] == 'kick':
+                if self.kicker_system.is_kicking:
+                    self.kicker_system.stop_kicking()
                 else:
-                    print('unknown command recieved', cmd)
-
-        except:
-            self.recording = False
-            pass
-            # self.video_stream.new_frame_cbs.remove(on_new_frame)
+                    self.kicker_system.start_kicking()
+            elif cmd['act'] == 'dribble':
+                if cmd['enable']:
+                    self.kicker_system.start_dribbling()
+                else:
+                    self.kicker_system.stop_dribbling()
+            elif cmd['act'] == 'set_recording':
+                self.set_recording(cmd['recording'])
+            else:
+                print('unknown command recieved', cmd)
 
     def set_recording(self, recording):
         RECORDINGS_DIR = './data/recordings'
@@ -258,55 +253,3 @@ class ControlServer(Sanic):
 
 def random_string(length): return ''.join(
     random.choice(string.ascii_lowercase) for _ in range(length))
-
-
-if __name__ == "__main__":
-
-    # from VisionSystem.DetectionModel import ThreshBlob
-    # from VisionSystem import VideoStream, VisionSystem, VisualObject
-
-    # use any available live feed device such as a webcam
-    #     video_stream = VideoStream(downsample_scale=8, crop=((0.13, 0), (.9, 1)))
-
-    #     objects_to_size_and_result_limit = {
-    #         "ball": ((0.043, 0.043, 0.043), 1),
-    #         "obstacle": ((0.18, 0.18, 0.2), None),
-    #         # 30 centimetres long, 10 cm high? i guess
-    #         # "blue_goal": ((0.3, 0.3, 0.1), 1),
-    #         # "yellow_goal": ((0.3, 0.3, 0.1), 1)
-    #     }
-
-    #     vision_system = VisionSystem(resolution=video_stream.resolution, objects_to_track={
-    #         name: VisualObject(
-    #             real_size=size,
-    #             detection_model=ThreshBlob.load(
-    #                 relpath("..", "models", f"{name}.threshblob.pkl")),
-    #             result_limit=result_limit
-    #         ) for name, (size, result_limit) in objects_to_size_and_result_limit.items()
-    #     })
-
-    try:
-        from drive_system import DriveSystem
-        drive_system = DriveSystem()
-
-    except ModuleNotFoundError:
-        # not on the raspberry pi, just mock it
-        def drive_system():
-            pass
-
-        drive_system.set_desired_motion = lambda x, y, omega: print(
-            'mock drive', x, y, omega)
-
-        def kicker_system():
-            pass
-
-        kicker_system.start_kicking = lambda: None
-        kicker_system.stop_kicking = lambda: None
-        kicker_system.is_kicking = False
-
-    ControlServer(
-        port=8000,
-        drive_system=drive_system,
-        kicker_system=kicker_system,
-        autobuild=True
-    ).run()

@@ -20,7 +20,6 @@ joint_properties = {
 class HexapodCore:
 
     def __init__(self, servo_driver):
-
         self.neck = Joint("neck", 'N', servo_driver)
 
         self.left_front = Leg('left front', 'LFH', 'LFK', 'LFA', servo_driver)
@@ -65,10 +64,10 @@ class Leg:
 
     def __init__(self, name, hip_key, knee_key, ankle_key, servo_driver, max_hip=45, max_knee=50, knee_leeway=10):
 
-        self.hip = Joint("hip", hip_key, max_hip, servo_driver)
+        self.hip = Joint("hip", hip_key, servo_driver, maxx=max_hip)
         self.knee = Joint("knee", knee_key, servo_driver,
-                          max_knee, leeway=knee_leeway)
-        self.ankle = Joint("ankle", servo_driver, ankle_key)
+                          maxx=max_knee, leeway=knee_leeway)
+        self.ankle = Joint("ankle", ankle_key, servo_driver)
 
         self.name = name
         self.joints = [self.hip, self.knee, self.ankle]
@@ -86,7 +85,7 @@ class Leg:
         if knee_angle == None:
             knee_angle = self.knee.angle
         if hip_angle == None:
-            hip_angle = self.hip.angle
+            hip_angle = self.hip.angle or 0
 
         self.pose(hip_angle, knee_angle, knee_angle - offset)
 
@@ -113,8 +112,7 @@ class Joint:
         self.joint_type, self.name = joint_type, jkey
         self.channel, self.min_pulse, self.max_pulse = joint_properties[jkey]
         self.max, self.leeway = maxx, leeway
-
-        self.off()
+        self.pose(0)
 
     def pose(self, angle=0):
 

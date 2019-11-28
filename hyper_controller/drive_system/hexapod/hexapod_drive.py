@@ -1,12 +1,12 @@
 from time import sleep
 from ..drive_system import DriveSystem
 from .hexy.hexapod import Hexapod
+from .hexy.servo_driver import MiniMaestro
 
 
 class HexapodDrive(DriveSystem, Hexapod):
-
     def __init__(self):
-        self.boot_up()
+        Hexapod.__init__(self, MiniMaestro())
 
     def set_desired_motion(self, _x, y, omega):
         # TODO: use nice remap() function included in ./hexy/core instead of random rescalers

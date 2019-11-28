@@ -8,6 +8,7 @@ name: qutrc
 channels:
   - https://conda.anaconda.org/rpi/linux-armv7l
   - https://conda.anaconda.org/rpi/noarch
+  - https://conda.anaconda.org/numba/linux-armv7l # for llvmlite
 
 # you can add private repositories to the above channel list, just make sure that the target arch is correct
 
@@ -23,7 +24,9 @@ dependencies:
   - numpy=1.15.1
   - pyserial=3.4.0
   - cython=0.28.5
-  - opencv==3.3.0
+  - opencv=3.3.0
+  - pandas=0.23.4
+  - llvmlite=0.31.0dev0
 
   # 2) pypi packages (work for other python repositories). Mainly for python-code packages.
   # worse in terms of ease-of-integration because they often reference binaries on the path by name,

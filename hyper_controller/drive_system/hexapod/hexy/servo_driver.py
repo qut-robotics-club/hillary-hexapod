@@ -18,7 +18,8 @@ class MiniMaestro(ServoDriver):
     RASPI_NO_INBUILT_WIFI_GPIO_SERIAL_DEV = "/dev/ttyACM0"
 
     def __init__(self, serial_device=RASPI_WITH_INBUILT_WIFI_GPIO_SERIAL_DEV):
-        self.serial = serial.Serial(serial_device)
+        # no need to specify baud rate as the mini-maestro supports autodetect
+        self.serial = serial.Serial(serial_device, baudrate=115200)
 
     def drive(self, channel, value):
         SET_SERVO_POS_CMD_BYTE = b'\x84'

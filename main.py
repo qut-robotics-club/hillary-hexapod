@@ -1,17 +1,7 @@
-from drive_system.hexapod import HexapodDrive
-from control_server import ControlServer
+from hyper_controller.drive_system.hexapod import HexapodDrive
+from hyper_controller.control_server import ControlServer
 
 if __name__ == "__main__":
-    try:
-        drive_system = HexapodDrive()
-    except:
-        # not on the raspberry pi, just mock it
-        def drive_system():
-            pass
-
-        drive_system.set_desired_motion = lambda x, y, omega: print(
-            'mock drive', x, y, omega)
-
     def kicker_system():
         pass
 
@@ -21,7 +11,7 @@ if __name__ == "__main__":
 
     ControlServer(
         port=8000,
-        drive_system=drive_system,
+        drive_system=HexapodDrive(),
         kicker_system=kicker_system,
-        autobuild=True
+        autobuild=False
     ).run()
