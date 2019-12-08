@@ -114,7 +114,7 @@ class ControlServer(Sanic):
 
             buffer = b''
 
-            for frame in self.video_stream:
+            async for frame in self.video_stream:
                 bgr = frame.get(ColorSpaces.BGR)
                 jpeg = cv2.imencode('.jpg', bgr)[1].tobytes()
 
@@ -127,8 +127,6 @@ class ControlServer(Sanic):
                         if len(buffer) > len(NALSeparator) and NALSeparator in buffer[-4:]:
                             await ws.send(buffer[:-4])
                             buffer = buffer[-4:]
-
-                await asyncio.sleep(0)
 
     async def live_stream_mjpg(self, req):
         async def stream(res):

@@ -4,7 +4,7 @@ from time import sleep
     R - right, L - left
     F - front, M - middle, B - back
     H - hip, K - knee, A - Ankle
-    key : (channel, minimum_pulse_length, maximum_pulse_length) """
+    key : (channel, minimum_pulse_length[0-254], maximum_pulse_length[0-254]) """
 
 joint_properties = {
     'LFH': (0, 248, 398), 'LFK': (1, 188, 476), 'LFA': (2, 131, 600),
@@ -19,20 +19,23 @@ joint_properties = {
 
 class HexapodCore:
 
-    def __init__(self, servo_driver):
-        self.neck = Joint("neck", 'N', servo_driver)
+    def __init__(self, servo_driver, joint_properties):
+        self.neck = Joint("neck", 'N', servo_driver, joint_properties)
 
-        self.left_front = Leg('left front', 'LFH', 'LFK', 'LFA', servo_driver)
+        self.left_front = Leg('left front', 'LFH', 'LFK',
+                              'LFA', servo_driver, joint_properties)
         self.right_front = Leg('right front', 'RFH',
-                               'RFK', 'RFA', servo_driver)
+                               'RFK', 'RFA', servo_driver, joint_properties)
 
         self.left_middle = Leg('left middle', 'LMH',
-                               'LMK', 'LMA', servo_driver)
+                               'LMK', 'LMA', servo_driver, joint_properties)
         self.right_middle = Leg('right middle', 'RMH',
-                                'RMK', 'RMA', servo_driver)
+                                'RMK', 'RMA', servo_driver, joint_properties)
 
-        self.left_back = Leg('left back', 'LBH', 'LBK', 'LBA', servo_driver)
-        self.right_back = Leg('right back', 'RBH', 'RBK', 'RBA', servo_driver)
+        self.left_back = Leg('left back', 'LBH', 'LBK',
+                             'LBA', servo_driver, joint_properties)
+        self.right_back = Leg('right back', 'RBH', 'RBK',
+                              'RBA', servo_driver, joint_properties)
 
         self.legs = [self.left_front, self.right_front,
                      self.left_middle, self.right_middle,
@@ -62,12 +65,13 @@ class HexapodCore:
 
 class Leg:
 
-    def __init__(self, name, hip_key, knee_key, ankle_key, servo_driver, max_hip=45, max_knee=50, knee_leeway=10):
+    def __init__(self, name, hip_key, knee_key, ankle_key, servo_driver, joint_properties, max_hip=45, max_knee=50, knee_leeway=10):
 
-        self.hip = Joint("hip", hip_key, servo_driver, maxx=max_hip)
-        self.knee = Joint("knee", knee_key, servo_driver,
+        self.hip = Joint("hip", hip_key, servo_driver,
+                         joint_properties, maxx=max_hip)
+        self.knee = Joint("knee", knee_key, servo_driver, joint_properties,
                           maxx=max_knee, leeway=knee_leeway)
-        self.ankle = Joint("ankle", ankle_key, servo_driver)
+        self.ankle = Joint("ankle", ankle_key, servo_driver, joint_properties)
 
         self.name = name
         self.joints = [self.hip, self.knee, self.ankle]
@@ -107,7 +111,7 @@ class Leg:
 
 class Joint:
 
-    def __init__(self, joint_type, jkey, servo_driver, maxx=90, leeway=0):
+    def __init__(self, joint_type, jkey, servo_driver, joint_properties, maxx=90, leeway=0):
         self.servo_driver = servo_driver
         self.joint_type, self.name = joint_type, jkey
         self.channel, self.min_pulse, self.max_pulse = joint_properties[jkey]

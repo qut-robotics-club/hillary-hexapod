@@ -2,11 +2,11 @@ import Rodal from "rodal";
 
 import "rodal/lib/rodal.css";
 
-import { API } from "../ts/api";
+import { Api } from "../ts/api";
 
 interface IMenuProps {
   onClose: () => void;
-  api: API;
+  api: Api;
 }
 
 const Menu = ({ onClose, api }: IMenuProps) => (

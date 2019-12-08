@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { useEffect, Dispatch, useState, Fragment, SetStateAction } from "react";
-import { API, useApi } from "../ts/api";
+import { Api, useApi } from "../ts/api";
 import WSAvcPlayer from "ws-avc-player";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -77,7 +77,7 @@ const LiveStreamErrorMessage = styled.p`
 `;
 
 const linkPlayer = (
-  api: API,
+  api: Api,
   [reactRef, width, height] = useResizeObserver(),
   [streamResolution, setStreamResolution] = useState(null),
   [connected, setConnected] = useState(false)
@@ -100,7 +100,7 @@ const linkPlayer = (
 };
 
 const linkRecorder = (
-  api: API,
+  api: Api,
   [recording, setRecording] = useState(false)
 ): [boolean, Dispatch<SetStateAction<boolean>>] => [
   recording,
@@ -111,7 +111,7 @@ const linkRecorder = (
 ];
 
 const linkVisionSystem = (
-  api: API,
+  api: Api,
   [visionResults, setVisionResults] = useState(null)
 ) =>
   visionResults === null

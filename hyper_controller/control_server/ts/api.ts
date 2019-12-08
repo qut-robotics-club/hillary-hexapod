@@ -2,9 +2,9 @@ import { useState } from "react";
 
 class VisionSystemResult {}
 
-export class API {
-  ws: WebSocket;
-  results_cbs: ((VisionSystemResult) => void)[];
+export class Api {
+  private ws: WebSocket;
+  private results_cbs: ((result: VisionSystemResult) => void)[];
 
   constructor(ws: WebSocket) {
     this.ws = ws;
@@ -15,29 +15,20 @@ export class API {
     };
   }
 
-  async setDesiredMotion(x, y, omega) {
+  setDesiredMotion = (x, y, omega) =>
     this.ws.send(JSON.stringify({ act: "drive", x, y, omega }));
-  }
 
   getLiveStreamUrl = () => _wsUrl("live_stream");
 
-  onVisionSystemResult(cb) {
-    this.results_cbs.push(cb);
-  }
+  onVisionSystemResult = cb => this.results_cbs.push(cb);
 
-  kick = () => {
-    console.log("kick called");
-    this.ws.send(JSON.stringify({ act: "kick" }));
-  };
+  kick = () => this.ws.send(JSON.stringify({ act: "kick" }));
 
-  setDribbling = enable => {
-    console.log("setting dribble via api", enable);
+  setDribbling = enable =>
     this.ws.send(JSON.stringify({ act: "dribble", enable }));
-  };
 
-  setRecording = recording => {
+  setRecording = recording =>
     this.ws.send(JSON.stringify({ act: "set_recording", recording }));
-  };
 }
 
 export const useApi = ([api, setApi] = useState(null)) =>
@@ -45,8 +36,18 @@ export const useApi = ([api, setApi] = useState(null)) =>
     ? api
     : (() => {
         const ws = new WebSocket(_wsUrl("remote_control"));
-        ws.onopen = _event => setApi(new API(ws));
+        ws.onopen = _event => setApi(new Api(ws));
       })();
+
+export const useMockApi = () =>
+  (({
+    setDesiredMotion: mockFn("setDesiredMotion"),
+    getLiveStreamUrl: mockFn("getLiveStreamUrl"),
+    onVisionSystemResult: mockFn("onVisionSystemResult"),
+    kick: mockFn("kick"),
+    setDribbling: mockFn("setDribbling"),
+    setRecording: mockFn("setRecording")
+  } as unknown) as Api);
 
 const _wsUrl = uri => {
   const url =
@@ -56,3 +57,6 @@ const _wsUrl = uri => {
   url.protocol = url.protocol.replace("http", "ws");
   return url.href;
 };
+
+const mockFn = name => (...args) =>
+  console.log(`${name} called with args ${args}}`) as any;

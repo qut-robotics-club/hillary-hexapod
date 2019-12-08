@@ -10,7 +10,7 @@ class ServoDriver(ABC):
         "sets the position value of a servo specified by 'channel' and its position on the board"
 
 
-class MiniMaestro(ServoDriver):
+class UartMiniSsc(ServoDriver):
 
     # raspberry pi 3+ and zero w
     RASPI_WITH_INBUILT_WIFI_GPIO_SERIAL_DEV = "/dev/ttyS0"
@@ -22,10 +22,10 @@ class MiniMaestro(ServoDriver):
         self.serial = serial.Serial(serial_device, baudrate=115200)
 
     def drive(self, channel, value):
-        SET_SERVO_POS_CMD_BYTE = b'\x84'
-        channel_byte = bytes([channel])
-        drive_servo_cmd = SET_SERVO_POS_CMD_BYTE + \
-            channel_byte + struct.pack("H", value)
+        "MiniSSC protocol"
+        SET_SERVO_POS_CMD_BYTE = b'\xFF'
+        drive_servo_cmd = struct.pack(
+            "cBB", SET_SERVO_POS_CMD_BYTE, channel, value)
         self.serial.write(drive_servo_cmd)
 
     def __del__(self):
