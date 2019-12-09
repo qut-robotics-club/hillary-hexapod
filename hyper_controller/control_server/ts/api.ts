@@ -31,6 +31,11 @@ export class Api {
     this.ws.send(JSON.stringify({ act: "set_recording", recording }));
 }
 
+const getMethodNames = (cls: any) =>
+  Object.getOwnPropertyNames(cls.prototype).filter(
+    prop => typeof cls.prototype[prop] === "function"
+  );
+
 export const useApi = ([api, setApi] = useState(null)) =>
   api
     ? api
@@ -39,15 +44,7 @@ export const useApi = ([api, setApi] = useState(null)) =>
         ws.onopen = _event => setApi(new Api(ws));
       })();
 
-export const useMockApi = () =>
-  (({
-    setDesiredMotion: mockFn("setDesiredMotion"),
-    getLiveStreamUrl: mockFn("getLiveStreamUrl"),
-    onVisionSystemResult: mockFn("onVisionSystemResult"),
-    kick: mockFn("kick"),
-    setDribbling: mockFn("setDribbling"),
-    setRecording: mockFn("setRecording")
-  } as unknown) as Api);
+export const useMockApi = () => getMethodNames(Api).map(mockFn);
 
 const _wsUrl = uri => {
   const url =
