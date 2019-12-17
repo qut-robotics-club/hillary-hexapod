@@ -27,11 +27,14 @@ dependencies:
   - opencv=3.3.0
   - pandas=0.23.4
   - llvmlite=0.31.0dev0
+  - jupyterlab=0.35.4
+  - ipywidgets=7.4.1
 
   # 2) pypi packages (work for other python repositories). Mainly for python-code packages.
   # worse in terms of ease-of-integration because they often reference binaries on the path by name,
   # rather than including them as build arguments.
   - pip:
+      - prompt_toolkit==1.0.15 # v2.0.4 currently has an incompatability with jupyter
       - picamera==1.13.0
       - pyngrok==1.4.0
       - sanic==19.9.0
