@@ -1,4 +1,4 @@
-name: qutrc
+name: hyper-controller
 
 # required debian packages:
 # xvfb, libsdl-image1.2-dev, libsdl-mixer1.2-dev, libsdl-ttf2.0-dev, libsdl1.2-dev, libportmidi-dev, libswscale-dev
@@ -47,3 +47,4 @@ dependencies:
       - librosa==0.7.1
       - matplotlib==3.1.1
       - sendgrid==6.1.0
+      - jupyros=0.3.0

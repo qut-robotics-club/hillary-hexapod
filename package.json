@@ -1,7 +1,7 @@
 {
-  "name": "controlserver",
+  "name": "hyper-controller",
   "version": "1.0.0",
-  "description": "control server (joysticks and such) for our soccer robot",
+  "description": "control server (joysticks and such) for QUTRC Robots. Also with simulations.",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,7 @@
     "start": "next start",
     "export": "next build . && next export && cp ./static/* ./out/"
   },
-  "author": "CallumJHays@gmail.com",
+  "author": "callumjhays@gmail.com",
   "license": "ISC",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.25",

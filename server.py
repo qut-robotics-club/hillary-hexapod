@@ -21,6 +21,8 @@ import random
 from concurrent.futures import TimeoutError
 import select
 
+from drive_system.hexapod import HexapodDrive
+
 
 SERVER_BASE_DIR = Path(__file__).parents[0].absolute()
 CLIENT_STATICS_DIR = SERVER_BASE_DIR / 'out'
@@ -251,3 +253,18 @@ class ControlServer(Sanic):
 
 def random_string(length): return ''.join(
     random.choice(string.ascii_lowercase) for _ in range(length))
+
+if __name__ == "__main__":
+    def kicker_system():
+        pass
+
+    kicker_system.start_kicking = lambda: None
+    kicker_system.stop_kicking = lambda: None
+    kicker_system.is_kicking = False
+
+    ControlServer(
+        port=8000,
+        drive_system=HexapodDrive(),
+        kicker_system=kicker_system,
+        autobuild=False
+    ).run()
