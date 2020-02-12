@@ -8,7 +8,7 @@ import json
 
 JUPYTER_LABEXTENSION_PKGS = {
     "@jupyter-widgets/jupyterlab-manager": "1.0.3",
-    "jupyterlab-plotly": "1.5.0",
+    # "jupyterlab-plotly": "1.5.0", causes a build issue on QUT's network as of 12/02/2020 - can't fetch 3d-view@2.0.0 from yarnpkg registry
     "jupyter-ros": "0.3.0"
 }
 
@@ -36,6 +36,8 @@ if __name__ == "__main__":
         else None
     )
 
+    print("updating conda version")
+
     # ensure conda is at the latest version
     call("conda update -n base -y conda")
 
@@ -56,6 +58,8 @@ if __name__ == "__main__":
             target_env_dir.mkdir(parents=True)
 
         tarfile.open(cache_env, "r:gz").extractall(target_env_dir)
+
+    print(f"syncing {conda_env_name} with environment.yml")
 
     # install / update the conda environment and all python / C++ / binary dependencies
     call("conda env update -f ./win-environment.yml --prune")

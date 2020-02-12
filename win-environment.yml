@@ -3,6 +3,7 @@ name: hyper-controller
 channels:
   - defaults
   - conda-forge
+  - numba
 
 dependencies:
   - python=3.6.6
