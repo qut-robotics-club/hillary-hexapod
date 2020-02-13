@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import Menu from "./Menu";
 // import LiveStream from "./LiveStream";
-import UrdfViewer from '../components/UrdfViewer'
+import UrdfViewer from "../components/UrdfViewer";
 
 import { useMockApi as useApi } from "../ts/api";
 
@@ -155,7 +155,7 @@ export default ({
         <Menu onClose={() => setMenuOpen(false)} api={api} />
       ) : null}
       <Container>
-        <UrdfViewer />
+        <UrdfViewer api={api} />
 
         <LeftSide>
           <Joystick
@@ -190,7 +190,7 @@ export default ({
           />
 
           <ButtonContainer>
-            <ConfigButtons>
+            {/* <ConfigButtons>
               <ToggleDribbleButton
                 onClick={() => {
                   api.setDribbling(!isDribbling);
@@ -205,15 +205,15 @@ export default ({
                 <br />
                 {isDribbling ? "ON" : "OFF"}
               </ToggleDribbleButton>
-              <MenuButton onClick={() => setMenuOpen(true)}>MENU</MenuButton>
             </ConfigButtons>
             <KickButton onClick={api.kick}>
               <b>KICK</b>
-            </KickButton>
+            </KickButton> */}
+            <MenuButton onClick={() => setMenuOpen(true)}>MENU</MenuButton>
           </ButtonContainer>
         </RightSide>
       </Container>
     </App>
   ) : (
-      <p>Creating a live connection to the robot...</p>
-    );
+    <p>Creating a live connection to the robot...</p>
+  );

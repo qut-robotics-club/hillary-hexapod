@@ -1,17 +1,22 @@
 import { useState } from "react";
 
-class VisionSystemResult { }
+class VisionSystemResult {}
 
 export class Api {
   private ws: WebSocket;
-  private results_cbs: ((result: VisionSystemResult) => void)[];
+  // private visionResultsCbs: ((result: VisionSystemResult) => void)[];
+  private jointStateUpdateCbs: ((update: {
+    [jointName: string]: number;
+  }) => void)[];
 
   constructor(ws: WebSocket) {
     this.ws = ws;
-    this.results_cbs = [];
+    // this.visionResultsCbs = [];
+    this.jointStateUpdateCbs = [];
     this.ws.onmessage = event => {
       const results = JSON.parse(event.data);
-      this.results_cbs.forEach(cb => cb(results));
+      this.jointStateUpdateCbs.forEach(cb => cb(results));
+      // this.visionResultsCbs.forEach(cb => cb(results));
     };
   }
 
@@ -23,8 +28,12 @@ export class Api {
     return _wsUrl("live_stream");
   }
 
+  onJointStateUpdate(cb) {
+    this.jointStateUpdateCbs.push(cb);
+  }
+
   onVisionSystemResult(cb) {
-    this.results_cbs.push(cb);
+    // this.visionResultsCbs.push(cb);
   }
 
   kick() {
@@ -49,16 +58,16 @@ export const useApi = ([api, setApi] = useState(null)) =>
   api
     ? api
     : (() => {
-      const ws = new WebSocket(_wsUrl("remote_control"));
-      ws.onopen = _event => setApi(new Api(ws));
-    })();
+        const ws = new WebSocket(_wsUrl("remote_control"));
+        ws.onopen = _event => setApi(new Api(ws));
+      })();
 
 export const useMockApi = () => {
   const api: any = {};
   getMethodNames(Api).forEach(methodName => {
-    api[methodName] = (...args) => { }
+    api[methodName] = (...args) => {};
     // console.log(`${methodName} called with args ${args}}`) as any;
-  })
+  });
   return api;
 };
 
@@ -66,7 +75,7 @@ const _wsUrl = uri => {
   const url =
     uri.indexOf("ws://") !== -1
       ? new URL(uri)
-      : new URL(`/${uri}`, window.location.href);
+      : new URL(`ws://localhost:8000/${uri}`, window.location.href);
   url.protocol = url.protocol.replace("http", "ws");
   return url.href;
 };

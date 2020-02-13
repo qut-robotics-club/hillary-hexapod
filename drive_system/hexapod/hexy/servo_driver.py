@@ -4,7 +4,6 @@ from abc import ABC, abstractclassmethod
 
 
 class ServoDriver(ABC):
-
     @abstractclassmethod
     def drive(channel, value):
         "sets the position value of a servo specified by 'channel' and its position on the board"
@@ -23,13 +22,17 @@ class UartMiniSsc(ServoDriver):
 
     def drive(self, channel, value):
         "MiniSSC protocol"
-        SET_SERVO_POS_CMD_BYTE = b'\xFF'
-        drive_servo_cmd = struct.pack(
-            "cBB", SET_SERVO_POS_CMD_BYTE, channel, value)
+        SET_SERVO_POS_CMD_BYTE = b"\xFF"
+        drive_servo_cmd = struct.pack("cBB", SET_SERVO_POS_CMD_BYTE, channel, value)
         self.serial.write(drive_servo_cmd)
 
     def __del__(self):
         self.serial.close()
+
+
+class MockServoDriver(ServoDriver):
+    def drive(self, channel, value):
+        pass
 
 
 class AdafruitPCA9685(ServoDriver):
