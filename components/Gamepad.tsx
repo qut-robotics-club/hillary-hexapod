@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { useState } from "react";
 
 import Menu from "./Menu";
-import LiveStream from "./LiveStream";
+// import LiveStream from "./LiveStream";
+import UrdfViewer from '../components/UrdfViewer'
 
 import { useMockApi as useApi } from "../ts/api";
 
@@ -154,7 +155,7 @@ export default ({
         <Menu onClose={() => setMenuOpen(false)} api={api} />
       ) : null}
       <Container>
-        <LiveStream api={api} />
+        <UrdfViewer />
 
         <LeftSide>
           <Joystick
@@ -214,5 +215,5 @@ export default ({
       </Container>
     </App>
   ) : (
-    <p>Creating a live connection to the robot...</p>
-  );
+      <p>Creating a live connection to the robot...</p>
+    );

@@ -26,6 +26,9 @@
     "rodal": "^1.6.3",
     "styled-components": "^4.3.2",
     "styled-jsx": "^3.2.2",
+    "three": "^0.113.2",
+    "threejs-model-loader": "^0.1.0",
+    "urdf-loader": "^0.8.0",
     "use-resize-observer": "^4.0.0",
     "ws-avc-player": "2.0.2"
   },

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-class VisionSystemResult {}
+class VisionSystemResult { }
 
 export class Api {
   private ws: WebSocket;
@@ -15,20 +15,29 @@ export class Api {
     };
   }
 
-  setDesiredMotion = (x, y, omega) =>
+  setDesiredMotion(x: number, y: number, omega: number) {
     this.ws.send(JSON.stringify({ act: "drive", x, y, omega }));
+  }
 
-  getLiveStreamUrl = () => _wsUrl("live_stream");
+  getLiveStreamUrl() {
+    return _wsUrl("live_stream");
+  }
 
-  onVisionSystemResult = cb => this.results_cbs.push(cb);
+  onVisionSystemResult(cb) {
+    this.results_cbs.push(cb);
+  }
 
-  kick = () => this.ws.send(JSON.stringify({ act: "kick" }));
+  kick() {
+    this.ws.send(JSON.stringify({ act: "kick" }));
+  }
 
-  setDribbling = enable =>
+  setDribbling(enable: boolean) {
     this.ws.send(JSON.stringify({ act: "dribble", enable }));
+  }
 
-  setRecording = recording =>
+  setRecording(recording: boolean) {
     this.ws.send(JSON.stringify({ act: "set_recording", recording }));
+  }
 }
 
 const getMethodNames = (cls: any) =>
@@ -40,11 +49,18 @@ export const useApi = ([api, setApi] = useState(null)) =>
   api
     ? api
     : (() => {
-        const ws = new WebSocket(_wsUrl("remote_control"));
-        ws.onopen = _event => setApi(new Api(ws));
-      })();
+      const ws = new WebSocket(_wsUrl("remote_control"));
+      ws.onopen = _event => setApi(new Api(ws));
+    })();
 
-export const useMockApi = () => getMethodNames(Api).map(mockFn);
+export const useMockApi = () => {
+  const api: any = {};
+  getMethodNames(Api).forEach(methodName => {
+    api[methodName] = (...args) => { }
+    // console.log(`${methodName} called with args ${args}}`) as any;
+  })
+  return api;
+};
 
 const _wsUrl = uri => {
   const url =
@@ -54,6 +70,3 @@ const _wsUrl = uri => {
   url.protocol = url.protocol.replace("http", "ws");
   return url.href;
 };
-
-const mockFn = name => (...args) =>
-  console.log(`${name} called with args ${args}}`) as any;

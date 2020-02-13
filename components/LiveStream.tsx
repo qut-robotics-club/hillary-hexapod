@@ -99,18 +99,18 @@ const linkPlayer = (
   return { reactRef, width, height, streamResolution };
 };
 
-const linkRecorder = (
+const useRecorder = (
   api: Api,
   [recording, setRecording] = useState(false)
 ): [boolean, Dispatch<SetStateAction<boolean>>] => [
-  recording,
-  (recording: boolean) => {
-    api.setRecording(recording);
-    setRecording(recording);
-  }
-];
+    recording,
+    (recording: boolean) => {
+      api.setRecording(recording);
+      setRecording(recording);
+    }
+  ];
 
-const linkVisionSystem = (
+const useVisionSystem = (
   api: Api,
   [visionResults, setVisionResults] = useState(null)
 ) =>
@@ -123,86 +123,84 @@ const LiveStream = ({
   _playerState: { reactRef, width, height, streamResolution } = linkPlayer(
     api
   ) as any,
-  _visionState: visionResults = linkVisionSystem(api),
+  _visionState: visionResults = useVisionSystem(api),
   _fullscreenState: [fullscreen, setFullscreen] = useState(false),
-  _recordingState: [recording, setRecording] = linkRecorder(api)
+  _recordingState: [recording, setRecording] = useRecorder(api)
 }) => (
-  <LiveStreamContainer fullscreen={fullscreen}>
-    <FullscreenButton onClick={() => setFullscreen(!fullscreen)}>
-      <FontAwesomeIcon icon={faExpand} />
-    </FullscreenButton>
-    <RecordButton onClick={() => setRecording(!recording)}>
-      <FontAwesomeIcon icon={recording ? faStopCircle : faPlayCircle} />{" "}
-      <span style={{ color: "white" }}>REC</span>
-    </RecordButton>
+    <LiveStreamContainer fullscreen={fullscreen}>
+      <FullscreenButton onClick={() => setFullscreen(!fullscreen)}>
+        <FontAwesomeIcon icon={faExpand} />
+      </FullscreenButton>
+      <RecordButton onClick={() => setRecording(!recording)}>
+        <FontAwesomeIcon icon={recording ? faStopCircle : faPlayCircle} />{" "}
+        <span style={{ color: "white" }}>REC</span>
+      </RecordButton>
 
-    {streamResolution ? (
-      <Stage
-        width={width}
-        height={height}
-        style={{
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-          position: "absolute"
-        }}
-      >
-        <Layer>
-          {Object.keys(visionResults).map(
-            (objName, colorIdx, _, color = CATEGORICAL_COLORS[colorIdx]) =>
-              visionResults[objName].map(
-                (
-                  [[[x1, y1], [x2, y2]], bearing, distance],
-                  idx,
-                  _arr,
-                  rescale = streamResolution
-                    ? rescaler(streamResolution, { width, height })
-                    : x => x
-                ) =>
-                  width === 1 && height === 1 ? null : (
-                    <Fragment key={idx}>
-                      <Rect
-                        x={rescale(x1, true)}
-                        y={rescale(streamResolution.height - y2, false)}
-                        width={rescale(x2 - x1, true)}
-                        height={rescale(y2 - y1, false)}
-                        stroke={color}
-                        strokeWidth={1}
-                      />
-                      {fullscreen ? (
-                        <Text
-                          x={rescale(x1 + 2, true)}
-                          y={rescale(streamResolution.height - y2 + 2, false)}
-                          fill={color}
-                          text={`${objName}: ${distance}cm@${bearing}°`}
+      {streamResolution ? (
+        <Stage
+          width={width}
+          height={height}
+          style={{
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            position: "absolute"
+          }}
+        >
+          <Layer>
+            {Object.keys(visionResults).map(
+              (objName, colorIdx, _, color = CATEGORICAL_COLORS[colorIdx]) =>
+                visionResults[objName].map(
+                  (
+                    [[[x1, y1], [x2, y2]], bearing, distance],
+                    idx,
+                    _arr,
+                    rescale = streamResolution
+                      ? rescaler(streamResolution, { width, height })
+                      : x => x
+                  ) =>
+                    width === 1 && height === 1 ? null : (
+                      <Fragment key={idx}>
+                        <Rect
+                          x={rescale(x1, true)}
+                          y={rescale(streamResolution.height - y2, false)}
+                          width={rescale(x2 - x1, true)}
+                          height={rescale(y2 - y1, false)}
+                          stroke={color}
+                          strokeWidth={1}
                         />
-                      ) : null}
-                    </Fragment>
-                  )
-              )
-          )}
-        </Layer>
-      </Stage>
-    ) : (
-      <LiveStreamErrorMessage>LOADING</LiveStreamErrorMessage>
-    )}
+                        {fullscreen ? (
+                          <Text
+                            x={rescale(x1 + 2, true)}
+                            y={rescale(streamResolution.height - y2 + 2, false)}
+                            fill={color}
+                            text={`${objName}: ${distance}cm@${bearing}°`}
+                          />
+                        ) : null}
+                      </Fragment>
+                    )
+                )
+            )}
+          </Layer>
+        </Stage>
+      ) : (
+          <LiveStreamErrorMessage>
+            LOADING
+          </LiveStreamErrorMessage>
+        )}
 
-    <canvas ref={reactRef} style={{ width: "100%", height: "100%" }} />
-  </LiveStreamContainer>
-);
+      <canvas ref={reactRef} style={{ width: "100%", height: "100%" }} />
+    </LiveStreamContainer>
+  );
 
 const rescaler = (
   { width: stream_width, height: stream_height },
   { width, height }
 ) => (val, is_x_dir) => {
-  console.log("rescaling ", val, "is_x_dir", is_x_dir);
-  console.log("stream resolution", stream_width, stream_height);
-  console.log("curr resolution", width, height);
   const res = is_x_dir
     ? (val * width) / stream_width
     : (val * height) / stream_height;
-  console.log("rescale result:", res);
   return res;
 };
 
