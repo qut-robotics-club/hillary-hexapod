@@ -1,6 +1,7 @@
-from time import sleep
 import json
 import asyncio
+from asyncio import sleep
+from math import pi
 
 """ joint_key convention:
     R - right, L - left
@@ -27,14 +28,27 @@ joint_properties = {
     "RBH": (15, 320, 480),
     "RBK": (16, 209, 499),
     "RBA": (17, 150, 676),
-    "N": (18, 150, 650),
 }
+
+
+def joint_deg_to_crab_urdf_rad(joint_name, deg):
+
+    crab_urdf_joint_name = (
+        {"H": "coxa", "K": "femur", "A": "tibia"}[joint_name[2]]
+        + "_joint_"
+        + joint_name[0].lower()
+        + {"F": "1", "M": "2", "B": "3"}[joint_name[1]]
+    )
+
+    crab_urdf_joint_rad = (
+        (deg + {"H": 0, "K": -30, "A": 90}[joint_name[2]]) * pi / 180  # offset
+    )
+
+    return {crab_urdf_joint_name: crab_urdf_joint_rad}
 
 
 class HexapodCore:
     def __init__(self, servo_driver, joint_properties):
-        self.neck = Joint("neck", "N", servo_driver, joint_properties)
-
         self.left_front = Leg(
             "left front", "LFH", "LFK", "LFA", servo_driver, joint_properties
         )
@@ -79,8 +93,6 @@ class HexapodCore:
             self.ankles.append(leg.ankle)
 
     def off(self):
-        self.neck.off()
-
         for leg in self.legs:
             leg.off()
 
@@ -121,13 +133,14 @@ class Leg:
         for joint in self.joints:
             joint.link_ws(ws)
 
-    def pose(self, hip_angle=0, knee_angle=0, ankle_angle=0):
+    async def pose(self, hip_angle=0, knee_angle=0, ankle_angle=0):
+        await asyncio.gather(
+            self.hip.pose(hip_angle),
+            self.knee.pose(knee_angle),
+            self.ankle.pose(ankle_angle),
+        )
 
-        self.hip.pose(hip_angle)
-        self.knee.pose(knee_angle)
-        self.ankle.pose(ankle_angle)
-
-    def move(self, knee_angle=None, hip_angle=None, offset=100):
+    async def move(self, knee_angle=None, hip_angle=None, offset=100):
         """ knee_angle < 0 means thigh is raised, ankle's angle will be set to the specified 
             knee angle minus the offset. offset best between 80 and 110 """
 
@@ -136,15 +149,15 @@ class Leg:
         if hip_angle == None:
             hip_angle = self.hip.angle or 0
 
-        self.pose(hip_angle, knee_angle, knee_angle - offset)
+        await self.pose(hip_angle, knee_angle, knee_angle - offset)
 
-    def replant(self, raised, floor, offset, t=0.1):
+    async def replant(self, raised, floor, offset, t=0.1):
 
-        self.move(raised)
-        sleep(t)
+        await self.move(raised)
+        await sleep(t)
 
-        self.move(floor, offset)
-        sleep(t)
+        await self.move(floor, offset)
+        await sleep(t)
 
     def off(self):
         for joint in self.joints:
@@ -163,20 +176,18 @@ class Joint:
         self.channel, self.min_pulse, self.max_pulse = joint_properties[jkey]
         self.max, self.leeway = maxx, leeway
         self.ws = None
-        self.pose(0)
+        self.angle = 0
 
     def link_ws(self, ws):
         self.ws = ws
 
-    def pose(self, angle=0):
+    async def pose(self, angle=0):
 
         angle = constrain(angle, -(self.max + self.leeway), self.max + self.leeway)
 
         if self.ws is not None:
-            pkt = json.dumps({self.name: angle})
-
             # create_task so that we can kickstart the coroutine without needing await
-            asyncio.get_event_loop().create_task(self.ws.send(pkt))
+            await self.ws.send(json.dumps(joint_deg_to_crab_urdf_rad(self.name, angle)))
 
         pulse = remap(angle, (-self.max, self.max), (self.min_pulse, self.max_pulse))
 

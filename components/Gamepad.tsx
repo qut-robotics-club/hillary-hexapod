@@ -6,7 +6,7 @@ import Menu from "./Menu";
 // import LiveStream from "./LiveStream";
 import UrdfViewer from "../components/UrdfViewer";
 
-import { useMockApi as useApi } from "../ts/api";
+import { useApi } from "../ts/api";
 
 const App = styled.div`
   font-family: Impact, Charcoal, sans-serif;

@@ -1,16 +1,16 @@
-from time import sleep
 from ..drive_system import DriveSystem
 from .hexy.core import joint_properties
-from .hexy.hexapod import Hexapod
+from .hexy.dancing import DancingHexapod
 from .hexy.servo_driver import UartMiniSsc, MockServoDriver
+from threading import Thread
+from asyncio import get_event_loop
 
 
-class HexapodDrive(DriveSystem, Hexapod):
+class HexapodDrive(DriveSystem, DancingHexapod):
     def __init__(self, simulated=False):
-        self.servo_driver = MockServoDriver() if simulated else UartMiniSsc()
-        Hexapod.__init__(
+        DancingHexapod.__init__(
             self,
-            self.servo_driver,
+            MockServoDriver() if simulated else UartMiniSsc(),
             {
                 "LFH": (0, 0, 255),
                 "LFK": (1, 0, 255),
@@ -33,22 +33,39 @@ class HexapodDrive(DriveSystem, Hexapod):
                 "N": (18, 0, 255),
             },
         )
+        self.begin_state("stand")
+
+    def begin_state(self, state):
+        self.state = state
+        self.state_task = get_event_loop().create_task(
+            self.squat(40)
+            if state is "stand"
+            else self.walk()
+            if state is "walk_forward"
+            else self.walk(swing=-25)
+            if state is "walk_backward"
+            else self.rotate(offset=40)
+            if state is "rotate_clockwise"
+            else self.rotate(offset=-40)
+            if state is "rotate_anti-clockwise"
+            else None
+        )
 
     def set_desired_motion(self, _x, y, omega):
-        # TODO: use nice remap() function included in ./hexy/core instead of random rescalers
-        if y != 0:
-            self.walk(swing=10 * y)
-        else:
-            self.rotate(offset=-10 * omega)
+        desired_state = (
+            "stand"
+            if y == 0 and omega == 0
+            else "walk_forward"
+            if y > 0
+            else "walk_backward"
+            if y < 0
+            else "rotate_clockwise"
+            if omega > 0
+            else "rotate_anti-clockwise"
+            if omega < 0
+            else None
+        )
 
-        # TODO: add calibration routines to the hypercontroller
-        # def calibrate_joint(joint, t, mn, mx, z):
-
-        #     while True:
-        #         for angle in [mn, z, mx, z]:
-        #             joint.pose(angle)
-        #             sleep(t)
-
-        # hexy = HexapodCore()
-        # calibrate_joint(hexy.right_back.knee, t=2, mn=-45, mx=45, z=0)
-        # # hexy.off()
+        if self.state != desired_state:
+            self.state_task.cancel()
+            self.begin_state(desired_state)

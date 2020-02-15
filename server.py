@@ -194,21 +194,22 @@ class ControlServer(Sanic):
         while True:
             cmd_json = await ws.recv()
             cmd = json.loads(cmd_json)
-            print(cmd)
             if cmd["act"] == "drive":
                 self.drive_system.set_desired_motion(
                     cmd["x"], cmd["y"], cmd["omega"] / 3
                 )
-            elif cmd["act"] == "kick":
-                if self.kicker_system.is_kicking:
-                    self.kicker_system.stop_kicking()
-                else:
-                    self.kicker_system.start_kicking()
-            elif cmd["act"] == "dribble":
-                if cmd["enable"]:
-                    self.kicker_system.start_dribbling()
-                else:
-                    self.kicker_system.stop_dribbling()
+            elif cmd["act"] == "command":
+                await getattr(self.drive_system, cmd["command"])()
+            # elif cmd["act"] == "kick":
+            #     if self.kicker_system.is_kicking:
+            #         self.kicker_system.stop_kicking()
+            #     else:
+            #         self.kicker_system.start_kicking()
+            # elif cmd["act"] == "dribble":
+            #     if cmd["enable"]:
+            #         self.kicker_system.start_dribbling()
+            #     else:
+            #         self.kicker_system.stop_dribbling()
             # elif cmd["act"] == "set_recording":
             #     self.set_recording(cmd["recording"])
             else:
