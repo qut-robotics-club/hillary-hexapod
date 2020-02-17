@@ -200,6 +200,20 @@ class ControlServer(Sanic):
                 )
             elif cmd["act"] == "command":
                 await getattr(self.drive_system, cmd["command"])()
+            elif cmd["act"] == "begin_calibration":
+                self.drive_system.begin_state("calibration")
+                await ws.send(
+                    json.dumps(
+                        {
+                            jointName: jointProps
+                            for jointName, jointProps in self.drive_system.joint_properties.items()
+                        }
+                    )
+                )
+            elif cmd["act"] == "calibrate":
+                await self.drive_system.calibrate(
+                    cmd["joint"], cmd["pulse"], cmd["is_min_pulse"]
+                )
             # elif cmd["act"] == "kick":
             #     if self.kicker_system.is_kicking:
             #         self.kicker_system.stop_kicking()

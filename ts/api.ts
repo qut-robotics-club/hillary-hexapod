@@ -24,6 +24,28 @@ export class Api {
     this.ws.send(JSON.stringify({ act: "drive", x, y, omega }));
   }
 
+  begin_calibration() {
+    this.ws.send(JSON.stringify({ act: "begin_calibration" }));
+    const orig_handler = this.ws.onmessage;
+    return new Promise(res => {
+      this.ws.onmessage = event => {
+        res(JSON.parse(event.data));
+        this.ws.onmessage = orig_handler;
+      };
+    });
+  }
+
+  calibrate(joint: string, pulse: number, isMinPulse: number) {
+    this.ws.send(
+      JSON.stringify({
+        act: "calibrate",
+        joint,
+        pulse,
+        is_min_pulse: isMinPulse
+      })
+    );
+  }
+
   getLiveStreamUrl() {
     return _wsUrl("live_stream");
   }

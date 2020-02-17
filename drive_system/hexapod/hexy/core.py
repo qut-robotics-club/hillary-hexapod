@@ -9,27 +9,6 @@ from math import pi
     H - hip, K - knee, A - Ankle
     key : (channel, minimum_pulse_length[0-254], maximum_pulse_length[0-254]) """
 
-joint_properties = {
-    "LFH": (0, 248, 398),
-    "LFK": (1, 188, 476),
-    "LFA": (2, 131, 600),
-    "RFH": (3, 275, 425),
-    "RFK": (4, 227, 507),
-    "RFA": (5, 160, 625),
-    "LMH": (6, 312, 457),
-    "LMK": (7, 251, 531),
-    "LMA": (8, 138, 598),
-    "RMH": (9, 240, 390),
-    "RMK": (10, 230, 514),
-    "RMA": (11, 150, 620),
-    "LBH": (12, 315, 465),
-    "LBK": (13, 166, 466),
-    "LBA": (14, 140, 620),
-    "RBH": (15, 320, 480),
-    "RBK": (16, 209, 499),
-    "RBA": (17, 150, 676),
-}
-
 
 def joint_deg_to_crab_urdf_rad(joint_name, deg):
 
@@ -86,6 +65,7 @@ class HexapodCore:
         self.tripod2 = [self.right_front, self.left_middle, self.right_back]
 
         self.hips, self.knees, self.ankles = [], [], []
+        self.joint_properties = joint_properties
 
         for leg in self.legs:
             self.hips.append(leg.hip)

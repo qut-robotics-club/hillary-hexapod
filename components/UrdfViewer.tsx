@@ -2,6 +2,8 @@ import UrdfViewer from "../lib/urdf-viewer-element";
 import styled, { css } from "styled-components";
 import { useState, useEffect, useRef, MutableRefObject } from "react";
 import { Api } from "../ts/api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 customElements.define("urdf-viewer", UrdfViewer);
 
@@ -11,6 +13,7 @@ const useRobot = (ref: MutableRefObject<UrdfViewer>, api: Api) => {
   useEffect(() => {
     const viewer = ref.current;
     if (viewer !== undefined && viewer.robot !== null) {
+      setRobot(viewer.robot);
       const joints = viewer.robot.joints;
 
       api.onJointStateUpdate(update => {
@@ -34,10 +37,10 @@ const Container = styled.div`
 
   transition: all 0.5s;
   ${props =>
-    props.fullscreen
+    props.calibrating
       ? css`
           left: 0;
-          right: 0;
+          right: 30vw;
           bottom: 0;
         `
       : css`
@@ -47,12 +50,30 @@ const Container = styled.div`
         `}
 `;
 
+const ExitButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: transparent;
+  border: none;
+  color: black;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 20;
+`;
+
 export default ({
   api,
   ref = useRef<UrdfViewer>(),
-  _robot: robot = useRobot(ref, api)
+  _robot: robot = useRobot(ref, api),
+  _calibratingState: [calibrating, setCalibrating] = useState(false)
 }) => (
-  <Container>
+  <Container calibrating={calibrating}>
+    {calibrating ? (
+      <ExitButton onClick={() => setCalibrating(false)}>
+        <FontAwesomeIcon icon={faTimes} />
+      </ExitButton>
+    ) : null}
     <urdf-viewer
       ref={ref}
       up="+Z"

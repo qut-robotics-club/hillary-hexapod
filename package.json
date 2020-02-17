@@ -16,11 +16,13 @@
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/react-fontawesome": "^0.1.5",
     "@zeit/next-css": "^1.0.1",
+    "antd": "^3.26.11",
     "konva": "^4.0.12",
     "next": "^9.0.5",
     "next-offline": "^4.0.5",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-dual-rangeslider": "^1.2.16",
     "react-joystick": "^1.0.3",
     "react-konva": "^16.9.0-1",
     "rodal": "^1.6.3",
@@ -33,6 +35,7 @@
     "ws-avc-player": "2.0.2"
   },
   "devDependencies": {
+    "@types/antd": "^1.0.0",
     "@types/node": "^12.7.4",
     "@types/react": "^16.9.2",
     "typescript": "^3.6.2"
