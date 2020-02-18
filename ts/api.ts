@@ -101,7 +101,12 @@ const _wsUrl = uri => {
   const url =
     uri.indexOf("ws://") !== -1
       ? new URL(uri)
-      : new URL(`ws://localhost:8000/${uri}`, window.location.href);
+      : new URL(
+          process.env.NODE_ENV === "development"
+            ? `ws://localhost:8000/${uri}`
+            : uri,
+          window.location.href
+        );
   url.protocol = url.protocol.replace("http", "ws");
   return url.href;
 };
