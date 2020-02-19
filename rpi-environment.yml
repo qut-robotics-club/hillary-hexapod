@@ -6,9 +6,8 @@ name: hyper-controller
 # this limits the binary packages to either those that don't use binaries
 # or those that use binaries compatible with the raspberry Pi
 channels:
-  - https://conda.anaconda.org/rpi/linux-armv7l
-  - https://conda.anaconda.org/rpi/noarch
-  - https://conda.anaconda.org/numba/linux-armv7l # for llvmlite
+  - rpi
+  - numba # for llvmlite
 
 # you can add private repositories to the above channel list, just make sure that the target arch is correct
 
@@ -47,4 +46,4 @@ dependencies:
       - librosa==0.7.1
       - matplotlib==3.1.1
       - sendgrid==6.1.0
-      - jupyros=0.3.0
+      - jupyros==0.3.0

@@ -1,6 +1,6 @@
 FROM balenalib/raspberry-pi2-debian:latest
 
-RUN sudo apt update && sudo apt upgrade && sudo apt install wget bzip2
+RUN sudo apt update && sudo apt upgrade && sudo apt install wget bzip2 libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev libportmidi-dev ffmpeg libswscale-dev libavformat-dev libavcodec-dev
 
 RUN useradd -m -g sudo pi
 USER pi
