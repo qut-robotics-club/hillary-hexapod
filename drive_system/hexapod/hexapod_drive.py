@@ -1,17 +1,24 @@
 from ..drive_system import DriveSystem
-from .hexy.core import joint_properties
 from .hexy.dancing import DancingHexapod
 from .hexy.servo_driver import UartMiniSsc, MockServoDriver
 from threading import Thread
 from asyncio import get_event_loop
+import json
+from pathlib import Path
+import pickle
+
+CALIBRATION_FILEPATH = (
+    Path(__file__).parent.parent.parent / "data" / "hillary_calibration.pkl"
+)
 
 
 class HexapodDrive(DriveSystem, DancingHexapod):
     def __init__(self, simulated=False):
-        DancingHexapod.__init__(
-            self,
-            MockServoDriver() if simulated else UartMiniSsc(),
-            {
+        try:
+            with open(CALIBRATION_FILEPATH, "rb") as f:
+                joint_properties = pickle.load(f)
+        except FileNotFoundError:
+            joint_properties = {  # default
                 "LFH": (0, 0, 255),
                 "LFK": (1, 0, 255),
                 "LFA": (2, 0, 255),
@@ -30,9 +37,12 @@ class HexapodDrive(DriveSystem, DancingHexapod):
                 "RBH": (15, 0, 255),
                 "RBK": (16, 0, 255),
                 "RBA": (17, 0, 255),
-                "N": (18, 0, 255),
-            },
+            }
+
+        DancingHexapod.__init__(
+            self, MockServoDriver() if simulated else UartMiniSsc(), joint_properties
         )
+        self.joints = [joint for leg in self.legs for joint in leg.joints]
         self.begin_state("stand")
 
     def begin_state(self, state):
@@ -51,6 +61,26 @@ class HexapodDrive(DriveSystem, DancingHexapod):
             else None
         )
 
+    async def calibrate(self, joint_name, pulse, is_min_pulse=False):
+        if self.state == "calibration":
+            joint = next(joint for joint in self.joints if joint_name == joint.name)
+            props = self.joint_properties[joint_name]
+            self.joint_properties[joint_name] = (
+                props[0],
+                pulse if is_min_pulse else props[1],
+                pulse if not is_min_pulse else props[2],
+            )
+
+            if is_min_pulse:
+                joint.min_pulse = pulse
+            else:
+                joint.max_pulse = pulse
+
+            await joint.pose(-joint.max if is_min_pulse else joint.max)
+
+        with open(CALIBRATION_FILEPATH, "wb") as calibration_file:
+            pickle.dump(self.joint_properties, calibration_file)
+
     def set_desired_motion(self, _x, y, omega):
         desired_state = (
             "stand"
@@ -67,5 +97,6 @@ class HexapodDrive(DriveSystem, DancingHexapod):
         )
 
         if self.state != desired_state:
-            self.state_task.cancel()
+            if self.state_task is not None:
+                self.state_task.cancel()
             self.begin_state(desired_state)

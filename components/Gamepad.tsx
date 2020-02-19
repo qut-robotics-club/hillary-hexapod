@@ -1,10 +1,13 @@
 import ReactJoystick from "react-joystick";
 import styled from "styled-components";
 import { useState } from "react";
+import Rodal from "rodal";
 
-import Menu from "./Menu";
+import "antd/dist/antd.css";
+import "rodal/lib/rodal.css";
 // import LiveStream from "./LiveStream";
 import UrdfViewer from "../components/UrdfViewer";
+import { Slider } from "antd";
 
 import { useApi } from "../ts/api";
 
@@ -108,6 +111,19 @@ const MenuButton = styled.button`
   }
 `;
 
+const CalibrationPanel = styled.div`
+  color: #757575;
+  background-color: #424242;
+  position: absolute;
+  right: 0;
+  left: 70vw;
+  font-family: Calibri;
+  top: 0;
+  height: 100vh;
+  overflow: scroll;
+  padding: 5px;
+`;
+
 const Joystick = ({ height: height = "auto", bgText, onMove, onEnd }) => (
   <JoystickContainer>
     <span>{bgText}</span>
@@ -136,7 +152,7 @@ const Joystick = ({ height: height = "auto", bgText, onMove, onEnd }) => (
 );
 
 export default ({
-  _dribbleState: [isDribbling, setDribbling] = useState(false),
+  // _dribbleState: [isDribbling, setDribbling] = useState(false),
   _menuState: [isMenuOpen, setMenuOpen] = useState(false),
   _motionState: [{ x, y, omega }, _setDesiredMotion] = useState({
     x: 0,
@@ -147,50 +163,87 @@ export default ({
   setDesiredMotion = (x, y, omega) => {
     api.setDesiredMotion(x, y, omega); // update server state via websocket
     _setDesiredMotion({ x, y, omega }); // update client state via react hook
-  }
+  },
+  _calibratorsState: [calibrators, setCalibrators] = useState<{
+    [name: string]: [number, number, number]; // servoIdx, min, max
+  }>(null)
 }) =>
   api ? (
     <App>
-      {isMenuOpen ? (
-        <Menu onClose={() => setMenuOpen(false)} api={api} />
-      ) : null}
       <Container>
-        <UrdfViewer api={api} />
+        <UrdfViewer
+          api={api}
+          _calibratingState={[
+            calibrators !== null,
+            calibrating => {
+              if (!calibrating) {
+                setCalibrators(null);
+              }
+            }
+          ]}
+        />
+        {calibrators ? (
+          <CalibrationPanel>
+            <h2>Calibration</h2>
+            {Object.entries(calibrators).map(([name, [_, min, max]]) => (
+              <div key={name}>
+                {name}
+                <Slider
+                  range
+                  value={[min, max]}
+                  min={0}
+                  max={255}
+                  onChange={([newMin, newMax]) => {
+                    const minChanged = newMin !== min;
+                    calibrators[name][1] = newMin;
+                    calibrators[name][2] = newMax;
+                    setCalibrators({ ...calibrators });
+                    api.calibrate(
+                      name,
+                      minChanged ? newMin : newMax,
+                      minChanged
+                    );
+                  }}
+                />
+              </div>
+            ))}
+          </CalibrationPanel>
+        ) : (
+          <>
+            <LeftSide>
+              <Joystick
+                height="100vh"
+                bgText={`↑
+                  ← STRAFE →
+                  ↓`}
+                onMove={(_, stick) => {
+                  const MAX_STICK_DIST = 50;
+                  const angle = stick.angle.radian;
+                  const unitMagnitude = stick.distance / MAX_STICK_DIST;
+                  const x = unitMagnitude * Math.cos(angle);
+                  const y = unitMagnitude * Math.sin(angle);
+                  setDesiredMotion(x, y, omega);
+                }}
+                onEnd={() => setDesiredMotion(0, 0, omega)}
+              />
+            </LeftSide>
 
-        <LeftSide>
-          <Joystick
-            height="100vh"
-            bgText={`↑
-          ← STRAFE →
-          ↓`}
-            onMove={(_, stick) => {
-              const MAX_STICK_DIST = 50;
-              const angle = stick.angle.radian;
-              const unitMagnitude = stick.distance / MAX_STICK_DIST;
-              const x = unitMagnitude * Math.cos(angle);
-              const y = unitMagnitude * Math.sin(angle);
-              setDesiredMotion(x, y, omega);
-            }}
-            onEnd={() => setDesiredMotion(0, 0, omega)}
-          />
-        </LeftSide>
+            <RightSide>
+              <Joystick
+                height="70vh"
+                bgText="↶ ROTATE ↷"
+                onMove={(_, stick) => {
+                  const MAX_STICK_DIST = 50;
+                  const angle = stick.angle.radian;
+                  const unitMagnitude = stick.distance / MAX_STICK_DIST;
+                  const omega = unitMagnitude * Math.cos(angle);
+                  setDesiredMotion(x, y, omega);
+                }}
+                onEnd={() => setDesiredMotion(x, y, 0)}
+              />
 
-        <RightSide>
-          <Joystick
-            height="50vh"
-            bgText="↶ ROTATE ↷"
-            onMove={(_, stick) => {
-              const MAX_STICK_DIST = 50;
-              const angle = stick.angle.radian;
-              const unitMagnitude = stick.distance / MAX_STICK_DIST;
-              const omega = unitMagnitude * Math.cos(angle);
-              setDesiredMotion(x, y, omega);
-            }}
-            onEnd={() => setDesiredMotion(x, y, 0)}
-          />
-
-          <ButtonContainer>
-            {/* <ConfigButtons>
+              <ButtonContainer>
+                {/* <ConfigButtons>
               <ToggleDribbleButton
                 onClick={() => {
                   api.setDribbling(!isDribbling);
@@ -209,10 +262,31 @@ export default ({
             <KickButton onClick={api.kick}>
               <b>KICK</b>
             </KickButton> */}
-            <MenuButton onClick={() => setMenuOpen(true)}>MENU</MenuButton>
-          </ButtonContainer>
-        </RightSide>
+                <MenuButton onClick={() => setMenuOpen(true)}>MENU</MenuButton>
+              </ButtonContainer>
+            </RightSide>
+          </>
+        )}
       </Container>
+      )}
+      <Rodal
+        visible={isMenuOpen}
+        onClose={() => setMenuOpen(false)}
+        width={550}
+        height={300}
+      >
+        <h4>Actions</h4>
+        <button onClick={() => api.do("thriller")}>Thriller Dance</button>
+        <button onClick={() => api.do("default")}>Default</button>
+        <button
+          onClick={() => {
+            api.begin_calibration().then(setCalibrators);
+            setMenuOpen(false);
+          }}
+        >
+          Enter Calibration
+        </button>
+      </Rodal>
     </App>
   ) : (
     <p>Creating a live connection to the robot...</p>
