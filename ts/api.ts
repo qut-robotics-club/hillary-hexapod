@@ -40,6 +40,10 @@ export class Api {
     this.ws.send(JSON.stringify({ act: "kick" }));
   }
 
+  do(command: string) {
+    this.ws.send(JSON.stringify({ act: "command", command }));
+  }
+
   setDribbling(enable: boolean) {
     this.ws.send(JSON.stringify({ act: "dribble", enable }));
   }

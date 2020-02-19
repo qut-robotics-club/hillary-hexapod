@@ -13,18 +13,13 @@ const useRobot = (ref: MutableRefObject<UrdfViewer>, api: Api) => {
     if (viewer !== undefined && viewer.robot !== null) {
       const joints = viewer.robot.joints;
 
-      // api.onJointStateUpdate(jointState => {
-      //   // console.log("jointState", jointState);
-      // });
-      // test - move all joints a random amount 10 times a second
-
-      setInterval(() => {
-        console.log("randomly changing angles");
-        for (const name in joints) {
-          joints[name].setAngle(joints[name].angle + Math.random() - 0.5);
+      api.onJointStateUpdate(update => {
+        for (const jointName in update) {
+          joints[jointName].setAngle(update[jointName]);
         }
         viewer.redraw();
-      }, 1000);
+      });
+      // test - move all joints a random amount 10 times a second
     }
   }, [ref.current && ref.current.robot]);
 
@@ -46,9 +41,9 @@ const Container = styled.div`
           bottom: 0;
         `
       : css`
-          left: 25vw;
-          right: 50vw;
-          bottom: 70vh;
+          left: 20vw;
+          right: 40vw;
+          bottom: 60vh;
         `}
 `;
 
