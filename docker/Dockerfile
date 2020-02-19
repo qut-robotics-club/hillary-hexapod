@@ -10,3 +10,5 @@ RUN wget https://github.com/jjhelmus/berryconda/releases/download/v2.0.0/Berryco
 
 RUN bash Berryconda3-2.0.0-Linux-armv7l.sh -b
 ENV PATH /home/pi/berryconda3/bin:${PATH}
+
+CMD 

@@ -1,6 +1,0 @@
-version: '3'
-services:
-    rpi:
-        context: -
-        dockerfile: Dockerfile
-        platform: linux/arm/v7
