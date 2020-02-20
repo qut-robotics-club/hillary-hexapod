@@ -24,7 +24,7 @@ export class Api {
     this.ws.send(JSON.stringify({ act: "drive", x, y, omega }));
   }
 
-  begin_calibration() {
+  beginCalibration() {
     this.ws.send(JSON.stringify({ act: "begin_calibration" }));
     const orig_handler = this.ws.onmessage;
     return new Promise(res => {
@@ -35,13 +35,19 @@ export class Api {
     });
   }
 
-  calibrate(joint: string, pulse: number, isMinPulse: number) {
+  calibrate(
+    joint: string,
+    pulse: number,
+    isMinPulse: number,
+    isReversed: boolean
+  ) {
     this.ws.send(
       JSON.stringify({
         act: "calibrate",
         joint,
         pulse,
-        is_min_pulse: isMinPulse
+        is_min_pulse: isMinPulse,
+        is_reversed: isReversed
       })
     );
   }

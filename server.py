@@ -212,7 +212,7 @@ class ControlServer(Sanic):
                 )
             elif cmd["act"] == "calibrate":
                 await self.drive_system.calibrate(
-                    cmd["joint"], cmd["pulse"], cmd["is_min_pulse"]
+                    cmd["joint"], cmd["pulse"], cmd["is_min_pulse"], cmd["is_reversed"]
                 )
             # elif cmd["act"] == "kick":
             #     if self.kicker_system.is_kicking:

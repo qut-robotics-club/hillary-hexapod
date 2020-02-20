@@ -7,7 +7,7 @@ import "antd/dist/antd.css";
 import "rodal/lib/rodal.css";
 // import LiveStream from "./LiveStream";
 import UrdfViewer from "../components/UrdfViewer";
-import { Slider } from "antd";
+import { Slider, Checkbox } from "antd";
 
 import { useApi } from "../ts/api";
 
@@ -165,7 +165,7 @@ export default ({
     _setDesiredMotion({ x, y, omega }); // update client state via react hook
   },
   _calibratorsState: [calibrators, setCalibrators] = useState<{
-    [name: string]: [number, number, number]; // servoIdx, min, max
+    [name: string]: [number, number, number, boolean]; // servoIdx, min, max, isReversed
   }>(null)
 }) =>
   api ? (
@@ -185,28 +185,42 @@ export default ({
         {calibrators ? (
           <CalibrationPanel>
             <h2>Calibration</h2>
-            {Object.entries(calibrators).map(([name, [_, min, max]]) => (
-              <div key={name}>
-                {name}
-                <Slider
-                  range
-                  value={[min, max]}
-                  min={0}
-                  max={255}
-                  onChange={([newMin, newMax]) => {
-                    const minChanged = newMin !== min;
-                    calibrators[name][1] = newMin;
-                    calibrators[name][2] = newMax;
-                    setCalibrators({ ...calibrators });
-                    api.calibrate(
-                      name,
-                      minChanged ? newMin : newMax,
-                      minChanged
-                    );
-                  }}
-                />
-              </div>
-            ))}
+            {Object.entries(calibrators).map(
+              ([name, [_, min, max, isReversed]]) => (
+                <div key={name}>
+                  {name}
+                  <Checkbox
+                    checked={isReversed}
+                    onChange={e => {
+                      const isReversed = e.target.checked;
+                      calibrators[name][3] = isReversed;
+                      setCalibrators({ ...calibrators });
+                      api.calibrate(name, min, true, isReversed);
+                    }}
+                  >
+                    Reversed?
+                  </Checkbox>
+                  <Slider
+                    range
+                    value={[min, max]}
+                    min={0}
+                    max={255}
+                    onChange={([newMin, newMax]) => {
+                      const minChanged = newMin !== min;
+                      calibrators[name][1] = newMin;
+                      calibrators[name][2] = newMax;
+                      setCalibrators({ ...calibrators });
+                      api.calibrate(
+                        name,
+                        minChanged ? newMin : newMax,
+                        minChanged,
+                        isReversed
+                      );
+                    }}
+                  />
+                </div>
+              )
+            )}
           </CalibrationPanel>
         ) : (
           <>
@@ -280,7 +294,7 @@ export default ({
         <button onClick={() => api.do("default")}>Default</button>
         <button
           onClick={() => {
-            api.begin_calibration().then(setCalibrators);
+            api.beginCalibration().then(setCalibrators);
             setMenuOpen(false);
           }}
         >

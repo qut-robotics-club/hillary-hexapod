@@ -153,7 +153,7 @@ class Joint:
     ):
         self.servo_driver = servo_driver
         self.joint_type, self.name = joint_type, jkey
-        self.channel, self.min_pulse, self.max_pulse = joint_properties[jkey]
+        self.channel, self.min_pulse, self.max_pulse, self.is_reversed = joint_properties[jkey]
         self.max, self.leeway = maxx, leeway
         self.ws = None
         self.angle = 0
@@ -169,7 +169,7 @@ class Joint:
             # create_task so that we can kickstart the coroutine without needing await
             await self.ws.send(json.dumps(joint_deg_to_crab_urdf_rad(self.name, angle)))
 
-        pulse = remap(angle, (-self.max, self.max), (self.min_pulse, self.max_pulse))
+        pulse = remap(angle, (-self.max, self.max), (self.max_pulse, self.min_pulse) if self.is_reversed else (self.min_pulse, self.max_pulse))
 
         self.servo_driver.drive(self.channel, pulse)
         self.angle = angle

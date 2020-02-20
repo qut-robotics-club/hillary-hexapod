@@ -19,24 +19,24 @@ class HexapodDrive(DriveSystem, DancingHexapod):
                 joint_properties = pickle.load(f)
         except FileNotFoundError:
             joint_properties = {  # default
-                "LFH": (0, 0, 255),
-                "LFK": (1, 0, 255),
-                "LFA": (2, 0, 255),
-                "RFH": (3, 0, 255),
-                "RFK": (4, 0, 255),
-                "RFA": (5, 0, 255),
-                "LMH": (6, 0, 255),
-                "LMK": (7, 0, 255),
-                "LMA": (8, 0, 255),
-                "RMH": (9, 0, 255),
-                "RMK": (10, 0, 255),
-                "RMA": (11, 0, 255),
-                "LBH": (12, 0, 255),
-                "LBK": (13, 0, 255),
-                "LBA": (14, 0, 255),
-                "RBH": (15, 0, 255),
-                "RBK": (16, 0, 255),
-                "RBA": (17, 0, 255),
+                "LFH": (0, 0, 255, False),
+                "LFK": (1, 0, 255, True),
+                "LFA": (2, 0, 255, True),
+                "RFH": (3, 0, 255, False),
+                "RFK": (4, 0, 255, True),
+                "RFA": (5, 0, 255, True),
+                "LMH": (6, 0, 255, False),
+                "LMK": (7, 0, 255, True),
+                "LMA": (8, 0, 255, True),
+                "RMH": (9, 0, 255, False),
+                "RMK": (10, 0, 255, True),
+                "RMA": (11, 0, 255, True),
+                "LBH": (12, 0, 255, False),
+                "LBK": (13, 0, 255, True),
+                "LBA": (14, 0, 255, True),
+                "RBH": (15, 0, 255, False),
+                "RBK": (16, 0, 255, True),
+                "RBA": (17, 0, 255, True),
             }
 
         DancingHexapod.__init__(
@@ -61,7 +61,7 @@ class HexapodDrive(DriveSystem, DancingHexapod):
             else None
         )
 
-    async def calibrate(self, joint_name, pulse, is_min_pulse=False):
+    async def calibrate(self, joint_name, pulse, is_min_pulse, is_reversed):
         if self.state == "calibration":
             joint = next(joint for joint in self.joints if joint_name == joint.name)
             props = self.joint_properties[joint_name]
@@ -69,7 +69,10 @@ class HexapodDrive(DriveSystem, DancingHexapod):
                 props[0],
                 pulse if is_min_pulse else props[1],
                 pulse if not is_min_pulse else props[2],
+                is_reversed,
             )
+
+            joint.is_reversed = is_reversed
 
             if is_min_pulse:
                 joint.min_pulse = pulse
