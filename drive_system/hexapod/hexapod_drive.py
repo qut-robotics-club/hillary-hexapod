@@ -79,7 +79,7 @@ class HexapodDrive(DriveSystem, DancingHexapod):
             else:
                 joint.max_pulse = pulse
 
-            await joint.pose(-joint.max if is_min_pulse else joint.max)
+            await joint.pose(-joint.max if is_min_pulse != is_reversed else joint.max)
 
         with open(CALIBRATION_FILEPATH, "wb") as calibration_file:
             pickle.dump(self.joint_properties, calibration_file)
