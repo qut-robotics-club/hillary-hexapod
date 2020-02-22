@@ -1,4 +1,4 @@
-name: hyper-controller
+name: hillary
 
 # required debian packages:
 # xvfb, libsdl-image1.2-dev, libsdl-mixer1.2-dev, libsdl-ttf2.0-dev, libsdl1.2-dev, libportmidi-dev, libswscale-dev
