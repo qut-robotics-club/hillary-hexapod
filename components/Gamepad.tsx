@@ -202,6 +202,7 @@ export default ({
                   </Checkbox>
                   <Slider
                     range
+                    reverse={isReversed}
                     value={[min, max]}
                     min={0}
                     max={255}

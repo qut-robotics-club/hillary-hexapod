@@ -21,7 +21,7 @@ import random
 from concurrent.futures import TimeoutError
 import select
 
-from drive_system.hexapod import HexapodDrive
+from drive_system.hexapod_drive import HexapodDrive
 
 
 SERVER_BASE_DIR = Path(__file__).parents[0].absolute()

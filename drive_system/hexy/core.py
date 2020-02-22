@@ -153,7 +153,9 @@ class Joint:
     ):
         self.servo_driver = servo_driver
         self.joint_type, self.name = joint_type, jkey
-        self.channel, self.min_pulse, self.max_pulse, self.is_reversed = joint_properties[jkey]
+        self.channel, self.min_pulse, self.max_pulse, self.is_reversed = joint_properties[
+            jkey
+        ]
         self.max, self.leeway = maxx, leeway
         self.ws = None
         self.angle = 0
@@ -169,8 +171,15 @@ class Joint:
             # create_task so that we can kickstart the coroutine without needing await
             await self.ws.send(json.dumps(joint_deg_to_crab_urdf_rad(self.name, angle)))
 
-        pulse = remap(angle, (-self.max, self.max), (self.max_pulse, self.min_pulse) if self.is_reversed else (self.min_pulse, self.max_pulse))
+        print("pose", angle, self.is_reversed, self.min_pulse, self.max_pulse)
+        pulse = remap(
+            angle,
+            (-self.max, self.max),
+            (self.min_pulse, self.max_pulse),
+            is_reversed=self.is_reversed,
+        )
 
+        print(pulse)
         self.servo_driver.drive(self.channel, pulse)
         self.angle = angle
 
@@ -195,8 +204,13 @@ def constrain(val, min_val, max_val):
     return min(max_val, max(min_val, val))
 
 
-def remap(old_val, old, new):
+def remap(old_val, old, new, is_reversed=False):
     (old_min, old_max) = old
     (new_min, new_max) = new
     new_diff = (new_max - new_min) * (old_val - old_min) / float((old_max - old_min))
-    return int(round(new_diff)) + new_min
+    return (
+        (new_max - int(round(new_diff)))
+        if is_reversed
+        else (int(round(new_diff)) + new_min)
+    )
+

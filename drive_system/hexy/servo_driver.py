@@ -9,6 +9,25 @@ class ServoDriver(ABC):
         "sets the position value of a servo specified by 'channel' and its position on the board"
 
 
+# class SparkfunPiServoHat(ServoDriver):
+#     def __init__(self):
+#         from smbus2 import SMBus
+
+#         self.bus = SMBus(1)
+#         self.addr = 0x40
+#         # Next, we want to enable the PWM chip and tell it to automatically increment
+#         # addresses after a write (that lets us do single-operation multi-byte writes).
+#         self.bus.write_byte_data(self.addr, 0, 0x20)
+#         self.bus.write_byte_data(self.addr, 0xFE, 0x1E)
+
+#         # set servo pulse start times to 0
+#         for channel in range(16):
+#             self.bus.write_word_data(0x06 + channel * 4, 0)
+
+#     def drive(channel, value):
+#         self.bus.write_word_data(0x08 + channel * 4, remap(value, (0, 255), (0, 4095)))
+
+
 class UartMiniSsc(ServoDriver):
 
     # raspberry pi 3+ and zero w

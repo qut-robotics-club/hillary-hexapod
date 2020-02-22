@@ -1,71 +1,39 @@
-# hyper-controller
+# Hillary the Hexapod
 
-Monorepo for live-streaming control for a bunch of RPi QUTRC Robots (hexapods, omnibots, 6DOF-arms)
+Hillary is QUTRC's long-running hexapod project.
 
-Current local IP of the Pi on the hexapod on the QUT network is `172.19.44.211`.
-This is subject to change at any time the QUT dhcp server rolls over (although the network seems extremely large this year)
+## Mobile Controller
 
-To connect to the pi wirelessly, power it up by flipping the switch on the bot and ensuring the battery is charged.
+Hillary's software currently hosts a web-app that you can use to control, and calibrate her servos to the correct positions.
 
-You can then use the command (Windows or Linux):
+Hillary's Raspberry Pi is configured to self-host a hotspot using https://github.com/qut-robotics-club/comitup, which allows you to connect to her as long as she is powered, no external wifi routers needed!
 
-```
-ssh pi@172.19.44.211
-```
+(However they can easily be used to control Hillary globally using https://ngrok.com/)
 
-And then put the current password: `rustisthebest` in
+![robo-controller](/wiki/robo-controller.gif)
 
-## SSH shortcuts (linux only?)
+The 3D URDF (Unified Robot Description Format) model that you see above is currently ripped from https://github.com/eborghi10/Hexapod-ROS and does not properly represent Hillary in real life, but it's close enough for now.
 
-To save you from having to remember the password or IP when ssh'ing,
-if you are on linux you can save the local raspberry pi host as a configured host by editing `~/.ssh/config`
-on your development PC, adding a host config like so:
+Making a Solidworks assembly for Hillary needs to be done for more accurate simulation and calibration. Once a Solidworks assembly of Hillary is built, it can be exported to the URDF model that this software requires by installing the free URDF-exporter plugin http://wiki.ros.org/sw_urdf_exporter.
 
-```
-Host hillary
-    HostName 172.19.44.211
-    User pi
-```
+## Hexapod Kinematics
 
-Now run this command and input the password for the last time to get the rpi to trust your machine every time you SSH in:
+All hexapod kinematics (deciding what angles to move the joints to perform certain actions like walk, rotate and dance) are currently performed through a slightly-modified version of https://github.com/mithi/hexy.
 
-```
-ssh-copy-id hillary
-```
+Currently, servo calibration results are stored locally on the Pi, using a pickle file. Eventually, when ROS is integrated, this calibration will be stored as a "ROS parameter".
 
-Now all programs that use SSH internally don't have to ask you for the password,
+## Future Work: ROS Integration
 
-## Live development
+Eventually, Hillary should utilize a more modular approach to kinematics and control using ROS as demonstrated in https://github.com/eborghi10/Hexapod-ROS.
 
-The key to successful robotics development is setting in place good feedback loops. IE:
+This will enable members interested in experimenting with Hillary to swap out different software-subsystems at a whim and replace them with another one written in any chosen programming language (either with a local client library or by interfacing with the `rosbridge` websocket server).
 
-Code -> Test -> Evaluate -> Code...
+For example, you could write a Lidar sensor processing algorithm in MATLAB that subscribes to [Lidar messages](https://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html) looking at the ground around the hexapod, publishing [tf2 Transforms](http://docs.ros.org/kinetic/api/tf2/html/classtf2_1_1Transform.html) for ideal foot placement.
 
-The trick is to minimise the amount of time it takes to do all 3.
-When dealing with robotic control, unmodelled characteristics are very common and will often throw a spanner in the works,
-so its important to iterate quickly! We support a few solutions for this out of the box:
+Another engineer may then write a motion planner in Python utilizing [ROS Moveit](http://docs.ros.org/kinetic/api/moveit_tutorials/html/doc/move_group_python_interface/move_group_python_interface_tutorial.html) that performs out collision-free inverse-kinematics for the leg in question, publishing a [JointTrajectory](http://docs.ros.org/melodic/api/trajectory_msgs/html/msg/JointTrajectory.html).
 
-### With Jupyterlab
+A third engineer may then write a low-level hardware controller in C++ that utilizes [ROS Control](https://github.com/ros-controls/ros_control/wiki/hardware_interface) to interact with the MiniMaestro servo board over serial.
 
-JupyterLab is a python/notebook, in-browser IDE. It is accessible through the hyper-controller web-application in the menu.
+Another great advantage of using ROS is instantaneous integration with the [Gazebo Robot & Environment Simulator](http://gazebosim.org/) which will allow us to test and train Hillary's algorithms in simulated environments without having to worry about physical limitations (but ROS Control helps you model those as well!).
 
-JupyterLab and supporting python packages provide widgets that effortlessly interact with your python code.
-This allows you to construct animated visualizations & online models based on live data, view and manipulate live video streams and other sensors.
-
-### With SSHFS
-
-This is the option you want if you have a nicely customised editor setup, such as vscode with lots of plugins.
-Particularly useful for leveraging type annotation which was added in Python3.5.
-
-If doing development in vscode or another dev-machine editor, you can mount the corresponding project folder of the project
-you are working on on the raspberry Pi using `sshfs`. This allows for quick iteration as you don't need to keep uploading
-your code as you make updates, and can work off the pi directly.
-
-```
-cd ~/projects
-sshfs hillary:/home/pi/hyper-controller live_hyper-controller
-code live_hyper-controller
-```
-
-Using Jupyterlab to edit your experimentation code while editing an SSHFS folder
-in VSCode provides the best development experience I've seen with robotics.
+ROS and Gazebo were recently ported to Windows (early 2020). This means that Windows users can now use ROS for simulation and development as well without requiring linux emulation.

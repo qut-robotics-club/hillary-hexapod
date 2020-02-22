@@ -1,4 +1,4 @@
-from ..drive_system import DriveSystem
+from .drive_system import DriveSystem
 from .hexy.dancing import DancingHexapod
 from .hexy.servo_driver import UartMiniSsc, MockServoDriver
 from threading import Thread
