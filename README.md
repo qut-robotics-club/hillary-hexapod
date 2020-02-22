@@ -22,6 +22,23 @@ All hexapod kinematics (deciding what angles to move the joints to perform certa
 
 Currently, servo calibration results are stored locally on the Pi, using a pickle file. Eventually, when ROS is integrated, this calibration will be stored as a "ROS parameter".
 
+## Development Environment Setup
+
+First you will want to have 3 things installed.
+
+- [git](https://git-scm.com/download)
+- [vscode](https://code.visualstudio.com/) (recommended)
+- and [conda](https://docs.conda.io/en/latest/miniconda.html) (if installing on windows, selecting `ADD TO PATH (not recommended)`
+  during the installation is actually recommended by us. Although it can cause issues, it makes everything else easier.)
+  This install script is cross-platform, and should work on windows, mac or linux.
+  All the aforementioned requirements are... required =)
+
+Then run the cross-platform install script with python:
+
+```bash
+python install_dev.py
+```
+
 ## Future Work: ROS Integration
 
 Eventually, Hillary should utilize a more modular approach to kinematics and control using ROS as demonstrated in https://github.com/eborghi10/Hexapod-ROS.
@@ -37,3 +54,7 @@ A third engineer may then write a low-level hardware controller in C++ that util
 Another great advantage of using ROS is instantaneous integration with the [Gazebo Robot & Environment Simulator](http://gazebosim.org/) which will allow us to test and train Hillary's algorithms in simulated environments without having to worry about physical limitations (but ROS Control helps you model those as well!).
 
 ROS and Gazebo were recently ported to Windows (early 2020). This means that Windows users can now use ROS for simulation and development as well without requiring linux emulation.
+
+```
+
+```
